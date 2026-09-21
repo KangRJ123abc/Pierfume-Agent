@@ -15,7 +15,10 @@
       "Bash(curl -s -m 12 -o /dev/null -w \"pubchem => %{http_code}\\\\n\" \"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/limonene/property/IUPACName/JSON\")",
       "Bash(curl -s -m 12 -o /dev/null -w \"ncbi => %{http_code}\\\\n\" \"https://www.ncbi.nlm.nih.gov\")",
       "Bash(curl -s -m 15 \"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/limonene/cids/JSON\")",
-      "Bash(curl -s -m 15 \"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/22311/synonyms/JSON\")"
+      "Bash(curl -s -m 15 \"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/22311/synonyms/JSON\")",
+      "Bash(npm install *)",
+      "Bash(node scripts/validate-formula.mjs /tmp/bad-formula.yaml)",
+      "Bash(rm -f /tmp/bad-formula.yaml)"
     ],
     "additionalDirectories": [
       "\\tmp"

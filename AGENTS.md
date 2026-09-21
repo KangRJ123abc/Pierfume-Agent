@@ -15,9 +15,10 @@ Pierfume_Agent/
 ├── packages/pierfume-core/   # 主 pi package(本项目的开发主场)
 │   ├── extensions/{ifra-check,formula-lint}/   # 扩展(骨架,未实现)
 │   ├── skills/  prompts/                        # 占位
-│   ├── schemas/{materials,ifra-rules}.schema.json
+│   ├── schemas/{materials,ifra-rules,formula}.schema.json
 │   ├── data/{materials.sample.json, ifra-rules.json, _cas-draft.json}
-│   ├── scripts/{validate-data, fetch-cas, build-materials}.mjs
+│   ├── examples/formula.example.yaml           # 示例配方
+│   ├── scripts/{schema-validator, validate-data, validate-formula, fetch-cas, build-materials}.mjs
 │   └── docs/{data-verification-checklist, data-verification-report-2026-09-21}.md
 ├── docs/Pierfume-Agent-项目初始文档.md
 └── AGENTS.md                 # 本文件
@@ -30,8 +31,9 @@ Pierfume_Agent/
 - [x] **校验工具**:`scripts/validate-data.mjs`(零依赖:迷你 JSON Schema 校验 + CAS 校验位 + 跨文件引用检查 + `--selftest` 自测)
 - [x] **原料数据集**:22 条,**全部人工核对**(`humanVerified=true`),CAS 经 PubChem 机器核验
 - [x] **IFRA 规则表**:18 条带真实限量数值(来自 IFRA 官方 STD 文档,逐条标注 `stdDoc`/`amendment`/`drivingProperty`),全部人工核对
-- [ ] **配方 YAML Schema** —— 下一项
-- [ ] **formula-lint 扩展** —— D1–D2
+- [x] **git 仓库初始化**(2026-09-21,首个提交 aa88e64;pi/ 自带独立仓库,已 gitignore)
+- [x] **配方 YAML Schema**(D1):`schemas/formula.schema.json` + 示例 `examples/formula.example.yaml` + 校验脚本 `validate-formula.mjs`(schema 校验 + materialRef 跨文件引用 + 重复原料 + 总量归一 ±1;负向测试 4 类错误全部拦截)。设计:product.category(加引号的字符串)决定 ifra-check 适用限量列;fragranceUseLevelPct(缺省 100)换算浓缩物→成品
+- [ ] **formula-lint 扩展**(移植 validate-formula 为 Pi 扩展)—— D2
 - [ ] **ifra-check 扩展** —— D3–D4
 - [ ] **打包为 pi package 验证 `pi install`** —— D5
 
@@ -65,6 +67,7 @@ Pierfume_Agent/
 # 数据校验(改数据后必跑)
 cd packages/pierfume-core && npm run validate-data        # 校验
 npm run validate-data:self                                # 自测 + 校验
+npm run validate-formula [-- path/to/f.yaml]              # 校验配方(默认示例;支持绝对路径)
 
 # 扩展/包最终要能 pi install;本地验证方式
 cd pi && node packages/coding-agent/dist/bundle/cli.js --help
@@ -87,9 +90,9 @@ cd pi && node packages/coding-agent/dist/bundle/cli.js --help
 
 ## 9. 待办与下一步
 
-1. 定义**配方 YAML Schema**(原料引用、剂量 %、产品类别 Category、版本/元信息)—— D1
-2. 实现 **formula-lint** 扩展(未知原料、总量归一、剂量边界)
+1. [x] ~~定义**配方 YAML Schema**~~(已完成 D1,见 §3)
+2. 实现 **formula-lint** 扩展(未知原料、总量归一、剂量边界)—— D2:先看 pi 扩展如何注册命令/读取文件(参考 pi 内置扩展),把 validate-formula.mjs 逻辑移植为 TS 扩展
 3. 实现 **ifra-check** 扩展 + Markdown/JSON 双输出合规报告—— D3
 4. 打包验证 `pi install` + 端到端 demo—— D5
-5. **git 仓库尚未初始化**(项目根),文档要求"每天提交",建议尽早 `git init`
+5. [x] ~~git init~~(2026-09-21 完成,首个提交 aa88e64)
 6. 测试断言需基于人工核对后的数据,编写时向用户确认

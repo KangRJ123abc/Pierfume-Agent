@@ -11,6 +11,11 @@
   },
   "scripts": {
     "validate-data": "node scripts/validate-data.mjs",
-    "validate-data:self": "node scripts/validate-data.mjs --selftest"
+    "validate-data:self": "node scripts/validate-data.mjs --selftest",
+    "validate-formula": "node scripts/validate-formula.mjs",
+    "validate-formula:self": "node scripts/validate-formula.mjs -- examples/formula.example.yaml"
+  },
+  "devDependencies": {
+    "yaml": "^2.9.0"
   }
 }

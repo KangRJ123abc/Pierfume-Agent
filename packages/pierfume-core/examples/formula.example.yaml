@@ -1,0 +1,42 @@
+# 示例配方:玫瑰木香 EDP
+# materialRef 引用 data/materials.sample.json 的原料 id(单一事实来源);
+# pct 为该原料在香精浓缩物中的质量百分比,合计应≈100(formula-lint 校验);
+# product.category 必须加引号(YAML 中 4 是数字,'4' 才是字符串)。
+meta:
+  id: fm-rose-woody-edp
+  name: 玫瑰木香 EDP
+  version: "0.1.0"
+  author: 调香师 A
+  createdAt: 2026-09-21
+  status: draft
+  notes: D1 阶段示例配方,仅用于验证 schema 与 formula-lint
+
+product:
+  name: 玫瑰木香淡香精
+  category: "4"              # IFRA Category 4(含醇类/乙醇香精,EDP 类)
+  fragranceUseLevelPct: 15    # 香精在成品中添加 15%(ifra-check 按此换算成品浓度)
+  notes: EDP 常规添加量 10–20%
+
+formula:
+  - materialRef: hedione
+    pct: 20
+    notes: 茉莉骨架
+  - materialRef: alpha-isomethyl-ionone
+    pct: 8
+  - materialRef: geraniol
+    pct: 12
+  - materialRef: citronellol
+    pct: 8
+  - materialRef: benzyl-salicylate
+    pct: 10
+  - materialRef: hydroxycitronellal
+    pct: 6
+  - materialRef: coumarin
+    pct: 4
+  - materialRef: vanillin
+    pct: 2
+  - materialRef: cinnamal
+    pct: 0.3
+  - materialRef: ethanol
+    pct: 29.7
+    notes: 载体(本库 ethanol 条目)
