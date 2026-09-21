@@ -1,0 +1,470 @@
+[
+  {
+    "id": "alpha-isomethyl-ionone",
+    "name": "Alpha-Isomethyl Ionone",
+    "cas": "127-51-5",
+    "family": [
+      "floral",
+      "powdery"
+    ],
+    "note": "heart",
+    "odor": "violet, powdery",
+    "ifraEntryRef": "ifra-alpha-isomethyl-ionone",
+    "provenance": {
+      "sources": [
+        "PubChem CID 5372174 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "amyl-cinnamal",
+    "name": "Amyl Cinnamal",
+    "cas": "122-40-7",
+    "family": [
+      "floral"
+    ],
+    "note": "heart",
+    "odor": "jasmine, floral",
+    "ifraEntryRef": "ifra-amyl-cinnamal",
+    "provenance": {
+      "sources": [
+        "PubChem CID 31209 (母体物质, 人工核对 2026-09-21)",
+        "人工核对报告 2026-09-21",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    },
+    "synonyms": [
+      "101365-33-7 ((2Z)-2-Benzylideneheptanal, Z-isomer)"
+    ]
+  },
+  {
+    "id": "benzyl-benzoate",
+    "name": "Benzyl Benzoate",
+    "cas": "120-51-4",
+    "family": [
+      "balsamic"
+    ],
+    "note": "base",
+    "odor": "faint sweet balsamic, fixative",
+    "ifraEntryRef": "ifra-benzyl-benzoate",
+    "provenance": {
+      "sources": [
+        "PubChem CID 2345 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "benzyl-salicylate",
+    "name": "Benzyl Salicylate",
+    "cas": "118-58-1",
+    "family": [
+      "balsamic"
+    ],
+    "note": "base",
+    "odor": "faint balsamic, creamy",
+    "ifraEntryRef": "ifra-benzyl-salicylate",
+    "provenance": {
+      "sources": [
+        "PubChem CID 8363 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "cinnamal",
+    "name": "Cinnamal (Cinnamaldehyde)",
+    "cas": "104-55-2",
+    "family": [
+      "spicy"
+    ],
+    "note": "heart",
+    "odor": "cinnamon, warm",
+    "ifraEntryRef": "ifra-cinnamal",
+    "provenance": {
+      "sources": [
+        "PubChem CID 637511 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "citral",
+    "name": "Citral",
+    "cas": "5392-40-5",
+    "family": [
+      "citrus"
+    ],
+    "note": "top",
+    "odor": "lemon, sharp, citrus",
+    "ifraEntryRef": "ifra-citral",
+    "provenance": {
+      "sources": [
+        "PubChem CID 638011 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "citronellol",
+    "name": "Citronellol",
+    "cas": "106-22-9",
+    "family": [
+      "floral"
+    ],
+    "note": "heart",
+    "odor": "rose, fresh citrus",
+    "ifraEntryRef": "ifra-citronellol",
+    "provenance": {
+      "sources": [
+        "PubChem CID 8842 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "coumarin",
+    "name": "Coumarin",
+    "cas": "91-64-5",
+    "family": [
+      "gourmand",
+      "balsamic"
+    ],
+    "note": "base",
+    "odor": "sweet hay, tonka, vanilla",
+    "ifraEntryRef": "ifra-coumarin",
+    "provenance": {
+      "sources": [
+        "PubChem CID 323 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "ethanol",
+    "name": "Ethanol",
+    "cas": "64-17-5",
+    "family": [
+      "carrier"
+    ],
+    "note": "top",
+    "odor": "alcohol, solvent",
+    "ifraEntryRef": null,
+    "provenance": {
+      "sources": [
+        "PubChem CID 702 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "eugenol",
+    "name": "Eugenol",
+    "cas": "97-53-0",
+    "family": [
+      "spicy"
+    ],
+    "note": "heart",
+    "odor": "clove, warm, spicy",
+    "ifraEntryRef": "ifra-eugenol",
+    "provenance": {
+      "sources": [
+        "PubChem CID 3314 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "geraniol",
+    "name": "Geraniol",
+    "cas": "106-24-1",
+    "family": [
+      "floral"
+    ],
+    "note": "heart",
+    "odor": "rose, geranium",
+    "ifraEntryRef": "ifra-geraniol",
+    "provenance": {
+      "sources": [
+        "PubChem CID 637566 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "hedione",
+    "name": "Hedione (Methyl Dihydrojasmonate)",
+    "cas": "24851-98-7",
+    "family": [
+      "floral"
+    ],
+    "note": "heart",
+    "odor": "jasmine, fresh, transparent",
+    "ifraEntryRef": null,
+    "provenance": {
+      "sources": [
+        "PubChem CID 102861 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "hydroxycitronellal",
+    "name": "Hydroxycitronellal",
+    "cas": "107-75-5",
+    "family": [
+      "floral"
+    ],
+    "note": "heart",
+    "odor": "lily of the valley, fresh",
+    "ifraEntryRef": "ifra-hydroxycitronellal",
+    "provenance": {
+      "sources": [
+        "PubChem CID 7888 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "isoeugenol",
+    "name": "Isoeugenol",
+    "cas": "97-54-1",
+    "family": [
+      "spicy"
+    ],
+    "note": "heart",
+    "odor": "clove, carnation",
+    "ifraEntryRef": "ifra-isoeugenol",
+    "provenance": {
+      "sources": [
+        "PubChem CID 853433 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "lilial",
+    "name": "Lilial (BMHCA)",
+    "cas": "80-54-6",
+    "family": [
+      "floral"
+    ],
+    "note": "heart",
+    "odor": "lily of the valley, muguet",
+    "ifraEntryRef": "ifra-lilial",
+    "provenance": {
+      "sources": [
+        "PubChem CID 228987 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "limonene",
+    "name": "d-Limonene",
+    "cas": "5989-27-5",
+    "family": [
+      "citrus"
+    ],
+    "note": "top",
+    "odor": "orange peel, fresh",
+    "ifraEntryRef": "ifra-limonene",
+    "provenance": {
+      "sources": [
+        "PubChem CID 440917 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "linalool",
+    "name": "Linalool",
+    "cas": "78-70-6",
+    "family": [
+      "floral",
+      "woody"
+    ],
+    "note": "top",
+    "odor": "floral, woody, lavender",
+    "ifraEntryRef": "ifra-linalool",
+    "provenance": {
+      "sources": [
+        "PubChem CID 6549 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "lyral",
+    "name": "Lyral (HMMC)",
+    "cas": "31906-04-4",
+    "family": [
+      "floral"
+    ],
+    "note": "heart",
+    "odor": "lily of the valley, watery",
+    "ifraEntryRef": "ifra-lyral",
+    "provenance": {
+      "sources": [
+        "PubChem CID 91604 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "methyl-anthranilate",
+    "name": "Methyl Anthranilate",
+    "cas": "134-20-3",
+    "family": [
+      "fruity"
+    ],
+    "note": "heart",
+    "odor": "grape, sweet floral",
+    "ifraEntryRef": null,
+    "provenance": {
+      "sources": [
+        "PubChem CID 8635 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "musk-ketone",
+    "name": "Musk Ketone",
+    "cas": "81-14-1",
+    "family": [
+      "musky"
+    ],
+    "note": "base",
+    "odor": "sweet, powdery musk",
+    "ifraEntryRef": "ifra-musk-ketone",
+    "provenance": {
+      "sources": [
+        "PubChem CID 6669 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "musk-xylene",
+    "name": "Musk Xylene",
+    "cas": "81-15-2",
+    "family": [
+      "musky"
+    ],
+    "note": "base",
+    "odor": "musky, sweet",
+    "ifraEntryRef": "ifra-musk-xylene",
+    "provenance": {
+      "sources": [
+        "PubChem CID 62329 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  },
+  {
+    "id": "vanillin",
+    "name": "Vanillin",
+    "cas": "121-33-5",
+    "family": [
+      "gourmand"
+    ],
+    "note": "base",
+    "odor": "vanilla, sweet",
+    "ifraEntryRef": null,
+    "provenance": {
+      "sources": [
+        "PubChem CID 1183 (CAS 经校验位算法验证)",
+        "AI 整理初稿,待人工复核",
+        "人工核对 2026-09-21"
+      ],
+      "humanVerified": true,
+      "verifiedBy": "人工核对",
+      "verifiedAt": "2026-09-21"
+    }
+  }
+]

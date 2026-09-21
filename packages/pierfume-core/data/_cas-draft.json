@@ -1,0 +1,204 @@
+[
+  {
+    "query": "methyl dihydrojasmonate",
+    "cid": 102861,
+    "cas": [
+      "24851-98-7",
+      "128087-96-7"
+    ],
+    "id": "hedione"
+  },
+  {
+    "query": "Tetramethyl acetyloctahydronaphthalenes",
+    "error": "resolve: HTTP 404",
+    "id": "iso-e-super"
+  },
+  {
+    "query": "ethanol",
+    "cid": 702,
+    "cas": [
+      "64-17-5",
+      "42845-45-4"
+    ],
+    "id": "ethanol"
+  },
+  {
+    "query": "coumarin",
+    "cid": 323,
+    "cas": [
+      "91-64-5",
+      "103802-83-1"
+    ],
+    "id": "coumarin"
+  },
+  {
+    "query": "citral",
+    "cid": 638011,
+    "cas": [
+      "5392-40-5",
+      "141-27-5"
+    ],
+    "id": "citral"
+  },
+  {
+    "query": "eugenol",
+    "cid": 3314,
+    "cas": [
+      "97-53-0"
+    ],
+    "id": "eugenol"
+  },
+  {
+    "query": "isoeugenol",
+    "cid": 853433,
+    "cas": [
+      "97-54-1",
+      "5932-68-3"
+    ],
+    "id": "isoeugenol"
+  },
+  {
+    "query": "cinnamaldehyde",
+    "cid": 637511,
+    "cas": [
+      "104-55-2",
+      "14371-10-9"
+    ],
+    "id": "cinnamal"
+  },
+  {
+    "query": "geraniol",
+    "cid": 637566,
+    "cas": [
+      "106-24-1",
+      "624-15-7"
+    ],
+    "id": "geraniol"
+  },
+  {
+    "query": "citronellol",
+    "cid": 8842,
+    "cas": [
+      "106-22-9",
+      "26489-01-0"
+    ],
+    "id": "citronellol"
+  },
+  {
+    "query": "linalool",
+    "cid": 6549,
+    "cas": [
+      "78-70-6",
+      "22564-99-4"
+    ],
+    "id": "linalool"
+  },
+  {
+    "query": "benzyl salicylate",
+    "cid": 8363,
+    "cas": [
+      "118-58-1"
+    ],
+    "id": "benzyl-salicylate"
+  },
+  {
+    "query": "benzyl benzoate",
+    "cid": 2345,
+    "cas": [
+      "120-51-4"
+    ],
+    "id": "benzyl-benzoate"
+  },
+  {
+    "query": "hydroxycitronellal",
+    "cid": 7888,
+    "cas": [
+      "107-75-5"
+    ],
+    "id": "hydroxycitronellal"
+  },
+  {
+    "query": "amyl cinnamal",
+    "cid": 1712058,
+    "cas": [
+      "101365-33-7"
+    ],
+    "id": "amyl-cinnamal"
+  },
+  {
+    "query": "hydroxyisohexyl 3-cyclohexene carboxaldehyde",
+    "cid": 91604,
+    "cas": [
+      "31906-04-4",
+      "130066-44-3"
+    ],
+    "id": "lyral"
+  },
+  {
+    "query": "butylphenyl methylpropional",
+    "cid": 228987,
+    "cas": [
+      "80-54-6"
+    ],
+    "id": "lilial"
+  },
+  {
+    "query": "musk ketone",
+    "cid": 6669,
+    "cas": [
+      "81-14-1"
+    ],
+    "id": "musk-ketone"
+  },
+  {
+    "query": "musk xylene",
+    "cid": 62329,
+    "cas": [
+      "81-15-2"
+    ],
+    "id": "musk-xylene"
+  },
+  {
+    "query": "d-limonene",
+    "cid": 440917,
+    "cas": [
+      "5989-27-5"
+    ],
+    "id": "limonene"
+  },
+  {
+    "query": "vanillin",
+    "cid": 1183,
+    "cas": [
+      "121-33-5"
+    ],
+    "id": "vanillin"
+  },
+  {
+    "query": "methyl anthranilate",
+    "cid": 8635,
+    "cas": [
+      "134-20-3"
+    ],
+    "id": "methyl-anthranilate"
+  },
+  {
+    "query": "alpha-isomethyl ionone",
+    "cid": 5372174,
+    "cas": [
+      "127-51-5",
+      "15789-90-9"
+    ],
+    "id": "alpha-isomethyl-ionone"
+  },
+  {
+    "query": "oakmoss absolute",
+    "error": "resolve: HTTP 404",
+    "id": "oakmoss-absolute"
+  },
+  {
+    "query": "bergamot oil",
+    "error": "resolve: HTTP 404",
+    "id": "bergamot-oil"
+  }
+]

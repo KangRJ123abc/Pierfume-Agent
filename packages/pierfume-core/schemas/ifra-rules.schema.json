@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pierfume.local/schemas/ifra-rules.schema.json",
+  "title": "Pierfume IFRA rules table",
+  "description": "IFRA 限量规则表,是配方合规判定的唯一限量事实来源。开发期用公开修订摘要;商用前必须购买正版 IFRA Standard 逐条核对。测试断言所用条目必须 humanVerified=true。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "entries"],
+  "properties": {
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ifraStandard"],
+      "properties": {
+        "ifraStandard": {
+          "type": "string",
+          "description": "IFRA Standard 修订版本,如 '51st Amendment'"
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "cas", "restrictionType", "limits", "provenance"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^ifra-[a-z0-9]+(-[a-z0-9]+)*$",
+            "description": "规则条目稳定标识,被 materials.sample.json 的 ifraEntryRef 引用"
+          },
+          "name": { "type": "string", "minLength": 1 },
+          "cas": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{2,7}-\\d{2}-\\d$"
+            },
+            "uniqueItems": true,
+            "description": "条目覆盖的 CAS 号(格式 + 校验位由 validate-data 脚本验证)"
+          },
+          "restrictionType": {
+            "type": "string",
+            "enum": ["prohibition", "quantitative", "conditional", "specification"],
+            "description": "prohibition=禁用;quantitative=按类别限量;conditional=满足规格/条件方可使用;specification=对原料品质/纯度提出规格要求(无限量表)"
+          },
+          "amendment": {
+            "type": "string",
+            "description": "最近修订的 Amendment,如 '49'"
+          },
+          "stdDoc": {
+            "type": "string",
+            "description": "官方标准文档编号,如 'IFRA_STD_023.pdf'(来源追溯)"
+          },
+          "drivingProperty": {
+            "type": "string",
+            "description": "驱动限制的属性/毒理终点,如 'DERMAL SENSITIZATION AND SYSTEMIC TOXICITY'"
+          },
+          "limits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["category"],
+              "properties": {
+                "category": {
+                  "type": "string",
+                  "pattern": "^\\d{1,2}[A-D]?$",
+                  "description": "IFRA 产品类别(Category 1–12,含 5A/7B 等子类)"
+                },
+                "limitPct": {
+                  "type": ["number", "null"],
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "成品中最大允许浓度(% w/w);prohibition 或条件性条目可为 null"
+                },
+                "condition": {
+                  "type": "string",
+                  "description": "该类别下的附加条件/规格说明"
+                }
+              }
+            },
+            "description": "按产品类别的限量;空数组表示全面禁用或仅条件性限制"
+          },
+          "conditions": {
+            "type": "string",
+            "description": "通用条件/纯度规格(如过氧化物限值、日用 vs 食品用途)"
+          },
+          "notes": { "type": "string" },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["sources", "humanVerified"],
+            "properties": {
+              "sources": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "来源:公开修订摘要条目/页码或正版 IFRA Standard 引用"
+              },
+              "humanVerified": {
+                "type": "boolean",
+                "description": "false = AI 整理初稿,不得用于测试断言;true = 已人工核对"
+              },
+              "verifiedBy": { "type": "string" },
+              "verifiedAt": { "type": "string", "format": "date" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(echo \"exit=$?\")",
+      "Read(//tmp/**)",
+      "Bash(node -e \"console.log\\(require\\('./packages/coding-agent/package.json'\\).bin\\)\")",
+      "Bash(node packages/coding-agent/dist/cli.js --version)",
+      "Bash(node packages/coding-agent/dist/bundle/cli.js --help)",
+      "Bash(mkdir -p extensions/ifra-check extensions/formula-lint skills prompts)",
+      "Bash(echo \"placeholder — 骨架目录见 package.json pi 清单\")",
+      "Bash(cp data/materials.sample.json /tmp/mat.bak)",
+      "Bash(cp /tmp/mat.bak data/materials.sample.json)",
+      "Bash(curl -s -m 12 \"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/limonene/property/IUPACName/JSON\")",
+      "Bash(curl -s -m 12 -o /dev/null -w \"pubchem => %{http_code}\\\\n\" \"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/limonene/property/IUPACName/JSON\")",
+      "Bash(curl -s -m 12 -o /dev/null -w \"ncbi => %{http_code}\\\\n\" \"https://www.ncbi.nlm.nih.gov\")",
+      "Bash(curl -s -m 15 \"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/limonene/cids/JSON\")",
+      "Bash(curl -s -m 15 \"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/22311/synonyms/JSON\")"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
+    ]
+  }
+}

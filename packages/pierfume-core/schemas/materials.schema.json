@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pierfume.local/schemas/materials.schema.json",
+  "title": "Pierfume materials dataset",
+  "description": "原料测试数据集。事实性字段(CAS、IFRA 限量引用)只能来自 data/ 下的文件;AI 整理的初稿 humanVerified 必须为 false,人工逐条核对后方可置 true。",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "name", "cas", "family", "note", "provenance"],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "description": "项目内稳定标识,小写 kebab-case"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "description": "常用英文名"
+      },
+      "synonyms": {
+        "type": "array",
+        "items": { "type": "string" },
+        "uniqueItems": true
+      },
+      "cas": {
+        "type": "string",
+        "pattern": "^\\d{2,7}-\\d{2}-\\d$",
+        "description": "CAS 号(格式 + 校验位由 validate-data 脚本验证)"
+      },
+      "fema": {
+        "type": "string",
+        "pattern": "^\\d{4,5}$",
+        "description": "FEMA GRAS 编号(无则省略)"
+      },
+      "family": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "citrus",
+            "carrier",
+            "floral",
+            "green",
+            "woody",
+            "oriental",
+            "gourmand",
+            "herbal",
+            "minty",
+            "spicy",
+            "fruity",
+            "musky",
+            "aquatic",
+            "leathery",
+            "powdery",
+            "balsamic",
+            "earthy",
+            "animalic"
+          ]
+        },
+        "minItems": 1,
+        "uniqueItems": true,
+        "description": "受控香型词表,禁止自由发挥"
+      },
+      "note": {
+        "type": "string",
+        "enum": ["top", "heart", "base"],
+        "description": "挥发度/香阶:头香/体香/基香"
+      },
+      "odor": {
+        "type": "string",
+        "description": "简短气味描述"
+      },
+      "physChem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "molWeight": { "type": "number", "exclusiveMinimum": 0 },
+          "logP": { "type": "number" },
+          "flashPointC": { "type": "number" }
+        },
+        "description": "理化性质(MVP 可选;二期成本/RAG 占位)"
+      },
+      "ifraEntryRef": {
+        "type": ["string", "null"],
+        "pattern": "^ifra-[a-z0-9]+(-[a-z0-9]+)*$",
+        "description": "对 data/ifra-rules.json 中条目 id 的引用;无 IFRA 限制时为 null。限量本体只存在于 IFRA 规则表,此处禁止抄录限量数值"
+      },
+      "euAllergen": {
+        "type": "boolean",
+        "description": "是否属于 EU 化妆品法规需标注过敏原(三期多市场法规占位)"
+      },
+      "provenance": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sources", "humanVerified"],
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "来源描述/链接,如 PubChem CID、IFRA 修订摘要条目"
+          },
+          "humanVerified": {
+            "type": "boolean",
+            "description": "false = AI 整理初稿,仅用于开发调试;true = 已人工逐条核对"
+          },
+          "verifiedBy": { "type": "string" },
+          "verifiedAt": { "type": "string", "format": "date" }
+        }
+      }
+    }
+  }
+}

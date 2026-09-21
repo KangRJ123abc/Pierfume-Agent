@@ -1,0 +1,15 @@
+# 底座源码:pi/ 自带独立 git 仓库(上游克隆),根仓库不跟踪
+pi/
+
+# 依赖与构建产物
+node_modules/
+dist/
+*.log
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 本地临时/草稿数据(审计依据 _cas-draft.json 需保留,不入 gitignore)

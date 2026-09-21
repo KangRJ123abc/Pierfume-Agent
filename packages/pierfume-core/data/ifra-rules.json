@@ -1,0 +1,1440 @@
+{
+  "version": {
+    "ifraStandard": "51st Amendment",
+    "notes": "限量数值已按人工核对报告(2026-09-21)录入,来源均为 IFRA 官方标准文档(51st Amendment 合集/单个 STD PDF)或 PubChem 转引并标注官方文档号。"
+  },
+  "entries": [
+    {
+      "id": "ifra-alpha-isomethyl-ionone",
+      "name": "Methyl ionone, mixed isomers (α-Isomethyl ionone)",
+      "cas": [
+        "127-51-5"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_063.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 5.4
+        },
+        {
+          "category": "2",
+          "limitPct": 1.6
+        },
+        {
+          "category": "3",
+          "limitPct": 32
+        },
+        {
+          "category": "4",
+          "limitPct": 30
+        },
+        {
+          "category": "5A",
+          "limitPct": 7.6
+        },
+        {
+          "category": "5B",
+          "limitPct": 7.6
+        },
+        {
+          "category": "5C",
+          "limitPct": 7.6
+        },
+        {
+          "category": "5D",
+          "limitPct": 7.6
+        },
+        {
+          "category": "6",
+          "limitPct": 18
+        },
+        {
+          "category": "7A",
+          "limitPct": 61
+        },
+        {
+          "category": "7B",
+          "limitPct": 61
+        },
+        {
+          "category": "8",
+          "limitPct": 3.2
+        },
+        {
+          "category": "9",
+          "limitPct": 59
+        },
+        {
+          "category": "10A",
+          "limitPct": 100
+        },
+        {
+          "category": "10B",
+          "limitPct": 100
+        },
+        {
+          "category": "11A",
+          "limitPct": 100
+        },
+        {
+          "category": "11B",
+          "limitPct": 100
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "IFRA 官方 STD_063 PDF 截图直读",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_063.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-amyl-cinnamal",
+      "name": "alpha-Amyl cinnamic aldehyde",
+      "cas": [
+        "122-40-7",
+        "101365-33-7"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_005.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.58
+        },
+        {
+          "category": "2",
+          "limitPct": 0.53
+        },
+        {
+          "category": "3",
+          "limitPct": 0.26
+        },
+        {
+          "category": "4",
+          "limitPct": 7
+        },
+        {
+          "category": "5A",
+          "limitPct": 2.5
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.32
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.45
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.11
+        },
+        {
+          "category": "6",
+          "limitPct": 0.064
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.26
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.26
+        },
+        {
+          "category": "8",
+          "limitPct": 0.11
+        },
+        {
+          "category": "9",
+          "limitPct": 1.5
+        },
+        {
+          "category": "10A",
+          "limitPct": 1.5
+        },
+        {
+          "category": "10B",
+          "limitPct": 3.5
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.11
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.11
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "主 CAS 122-40-7(母体,IFRA 与 EU 过敏原清单范围号);101365-33-7 为 (2Z) 异构体",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_005.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-benzyl-benzoate",
+      "name": "Benzyl benzoate",
+      "cas": [
+        "120-51-4"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_009.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 1.7
+        },
+        {
+          "category": "2",
+          "limitPct": 1.4
+        },
+        {
+          "category": "3",
+          "limitPct": 0.41
+        },
+        {
+          "category": "4",
+          "limitPct": 4.8
+        },
+        {
+          "category": "5A",
+          "limitPct": 4.3
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.21
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.83
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.07
+        },
+        {
+          "category": "6",
+          "limitPct": 0.41
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.41
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.41
+        },
+        {
+          "category": "8",
+          "limitPct": 0.07
+        },
+        {
+          "category": "9",
+          "limitPct": 1.9
+        },
+        {
+          "category": "10A",
+          "limitPct": 1.9
+        },
+        {
+          "category": "10B",
+          "limitPct": 12
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.07
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.07
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号)",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_009.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-benzyl-salicylate",
+      "name": "Benzyl salicylate",
+      "cas": [
+        "118-58-1"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_011.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 1.3
+        },
+        {
+          "category": "2",
+          "limitPct": 0.39
+        },
+        {
+          "category": "3",
+          "limitPct": 7.8
+        },
+        {
+          "category": "4",
+          "limitPct": 7.3
+        },
+        {
+          "category": "5A",
+          "limitPct": 1.9
+        },
+        {
+          "category": "5B",
+          "limitPct": 1.9
+        },
+        {
+          "category": "5C",
+          "limitPct": 1.9
+        },
+        {
+          "category": "5D",
+          "limitPct": 1.9
+        },
+        {
+          "category": "6",
+          "limitPct": 4.3
+        },
+        {
+          "category": "7A",
+          "limitPct": 15
+        },
+        {
+          "category": "7B",
+          "limitPct": 15
+        },
+        {
+          "category": "8",
+          "limitPct": 0.77
+        },
+        {
+          "category": "9",
+          "limitPct": 14
+        },
+        {
+          "category": "10A",
+          "limitPct": 51
+        },
+        {
+          "category": "10B",
+          "limitPct": 51
+        },
+        {
+          "category": "11A",
+          "limitPct": 28
+        },
+        {
+          "category": "11B",
+          "limitPct": 28
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号)",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_011.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-cinnamal",
+      "name": "Cinnamic aldehyde",
+      "cas": [
+        "104-55-2"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_018.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.045
+        },
+        {
+          "category": "2",
+          "limitPct": 0.014
+        },
+        {
+          "category": "3",
+          "limitPct": 0.021
+        },
+        {
+          "category": "4",
+          "limitPct": 0.25
+        },
+        {
+          "category": "5A",
+          "limitPct": 0.064
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.042
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.064
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.014
+        },
+        {
+          "category": "6",
+          "limitPct": 0.15
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.17
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.17
+        },
+        {
+          "category": "8",
+          "limitPct": 0.014
+        },
+        {
+          "category": "9",
+          "limitPct": 0.49
+        },
+        {
+          "category": "10A",
+          "limitPct": 0.49
+        },
+        {
+          "category": "10B",
+          "limitPct": 1.8
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.014
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.014
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号)",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_018.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-citral",
+      "name": "Citral",
+      "cas": [
+        "5392-40-5"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_021.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.11
+        },
+        {
+          "category": "2",
+          "limitPct": 0.032
+        },
+        {
+          "category": "3",
+          "limitPct": 0.1
+        },
+        {
+          "category": "4",
+          "limitPct": 0.6
+        },
+        {
+          "category": "5A",
+          "limitPct": 0.15
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.15
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.15
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.051
+        },
+        {
+          "category": "6",
+          "limitPct": 0.35
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.2
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.2
+        },
+        {
+          "category": "8",
+          "limitPct": 0.051
+        },
+        {
+          "category": "9",
+          "limitPct": 1.2
+        },
+        {
+          "category": "10A",
+          "limitPct": 1.2
+        },
+        {
+          "category": "10B",
+          "limitPct": 4.2
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.051
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.051
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号);与官方合集 PDF 抽查比对一致",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_021.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-citronellol",
+      "name": "Citronellol",
+      "cas": [
+        "106-22-9"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_022.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 2.2
+        },
+        {
+          "category": "2",
+          "limitPct": 0.67
+        },
+        {
+          "category": "3",
+          "limitPct": 13
+        },
+        {
+          "category": "4",
+          "limitPct": 12
+        },
+        {
+          "category": "5A",
+          "limitPct": 3.2
+        },
+        {
+          "category": "5B",
+          "limitPct": 3.2
+        },
+        {
+          "category": "5C",
+          "limitPct": 3.2
+        },
+        {
+          "category": "5D",
+          "limitPct": 3.2
+        },
+        {
+          "category": "6",
+          "limitPct": 7.3
+        },
+        {
+          "category": "7A",
+          "limitPct": 25
+        },
+        {
+          "category": "7B",
+          "limitPct": 25
+        },
+        {
+          "category": "8",
+          "limitPct": 1.3
+        },
+        {
+          "category": "9",
+          "limitPct": 24
+        },
+        {
+          "category": "10A",
+          "limitPct": 87
+        },
+        {
+          "category": "10B",
+          "limitPct": 87
+        },
+        {
+          "category": "11A",
+          "limitPct": 48
+        },
+        {
+          "category": "11B",
+          "limitPct": 48
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号)",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_022.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-coumarin",
+      "name": "Coumarin",
+      "cas": [
+        "91-64-5"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_023.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.089
+        },
+        {
+          "category": "2",
+          "limitPct": 0.08
+        },
+        {
+          "category": "3",
+          "limitPct": 0.089
+        },
+        {
+          "category": "4",
+          "limitPct": 1.5
+        },
+        {
+          "category": "5A",
+          "limitPct": 0.38
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.11
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.16
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.035
+        },
+        {
+          "category": "6",
+          "limitPct": 0.0024
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.18
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.18
+        },
+        {
+          "category": "8",
+          "limitPct": 0.035
+        },
+        {
+          "category": "9",
+          "limitPct": 0.52
+        },
+        {
+          "category": "10A",
+          "limitPct": 0.52
+        },
+        {
+          "category": "10B",
+          "limitPct": 1.6
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.035
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.035
+        },
+        {
+          "category": "12",
+          "limitPct": 33
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号);与官方合集 PDF 抽查比对一致",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_023.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-eugenol",
+      "name": "Eugenol",
+      "cas": [
+        "97-53-0"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "51",
+      "stdDoc": "IFRA_STD_035.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.45
+        },
+        {
+          "category": "2",
+          "limitPct": 0.14
+        },
+        {
+          "category": "3",
+          "limitPct": 1
+        },
+        {
+          "category": "4",
+          "limitPct": 2.5
+        },
+        {
+          "category": "5A",
+          "limitPct": 0.64
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.64
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.64
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.21
+        },
+        {
+          "category": "6",
+          "limitPct": 1.5
+        },
+        {
+          "category": "7A",
+          "limitPct": 2
+        },
+        {
+          "category": "7B",
+          "limitPct": 2
+        },
+        {
+          "category": "8",
+          "limitPct": 0.21
+        },
+        {
+          "category": "9",
+          "limitPct": 4.9
+        },
+        {
+          "category": "10A",
+          "limitPct": 4
+        },
+        {
+          "category": "10B",
+          "limitPct": 18
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.21
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.21
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号)",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_035.pdf, Amendment 51)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-geraniol",
+      "name": "Geraniol",
+      "cas": [
+        "106-24-1"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "51",
+      "stdDoc": "IFRA_STD_037.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.78
+        },
+        {
+          "category": "2",
+          "limitPct": 0.25
+        },
+        {
+          "category": "3",
+          "limitPct": 1.1
+        },
+        {
+          "category": "4",
+          "limitPct": 4.7
+        },
+        {
+          "category": "5A",
+          "limitPct": 1.2
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.78
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.94
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.26
+        },
+        {
+          "category": "6",
+          "limitPct": 0.16
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.78
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.78
+        },
+        {
+          "category": "8",
+          "limitPct": 0.26
+        },
+        {
+          "category": "9",
+          "limitPct": 2.8
+        },
+        {
+          "category": "10A",
+          "limitPct": 1.1
+        },
+        {
+          "category": "10B",
+          "limitPct": 5.3
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.26
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.26
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "IFRA 官方 PDF 截图直读",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_037.pdf, Amendment 51)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-hydroxycitronellal",
+      "name": "Hydroxycitronellal",
+      "cas": [
+        "107-75-5"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "51",
+      "stdDoc": "IFRA_STD_043.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.38
+        },
+        {
+          "category": "2",
+          "limitPct": 0.11
+        },
+        {
+          "category": "3",
+          "limitPct": 2.3
+        },
+        {
+          "category": "4",
+          "limitPct": 2.1
+        },
+        {
+          "category": "5A",
+          "limitPct": 0.53
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.53
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.53
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.18
+        },
+        {
+          "category": "6",
+          "limitPct": 1.2
+        },
+        {
+          "category": "7A",
+          "limitPct": 1.6
+        },
+        {
+          "category": "7B",
+          "limitPct": 1.6
+        },
+        {
+          "category": "8",
+          "limitPct": 0.18
+        },
+        {
+          "category": "9",
+          "limitPct": 4.1
+        },
+        {
+          "category": "10A",
+          "limitPct": 0.78
+        },
+        {
+          "category": "10B",
+          "limitPct": 7.8
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.18
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.18
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号)",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_043.pdf, Amendment 51)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-isoeugenol",
+      "name": "Isoeugenol",
+      "cas": [
+        "97-54-1"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_048.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.019
+        },
+        {
+          "category": "2",
+          "limitPct": 0.0057
+        },
+        {
+          "category": "3",
+          "limitPct": 0.12
+        },
+        {
+          "category": "4",
+          "limitPct": 0.11
+        },
+        {
+          "category": "5A",
+          "limitPct": 0.027
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.027
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.027
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.009
+        },
+        {
+          "category": "6",
+          "limitPct": 0.063
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.22
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.22
+        },
+        {
+          "category": "8",
+          "limitPct": 0.009
+        },
+        {
+          "category": "9",
+          "limitPct": 0.21
+        },
+        {
+          "category": "10A",
+          "limitPct": 0.21
+        },
+        {
+          "category": "10B",
+          "limitPct": 0.75
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.009
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.009
+        },
+        {
+          "category": "12",
+          "limitPct": null,
+          "condition": "No Restriction"
+        }
+      ],
+      "conditions": "",
+      "notes": "PubChem IFRA 栏目转引(标注官方 STD 文档号)",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_048.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-lilial",
+      "name": "p-tert-Butyl-α-methylhydrocinnamic aldehyde (Lilial, p-BMHCA)",
+      "cas": [
+        "80-54-6"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA_STD_015.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION AND SYSTEMIC TOXICITY",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0,
+          "condition": "Prohibited"
+        },
+        {
+          "category": "2",
+          "limitPct": 0.09
+        },
+        {
+          "category": "3",
+          "limitPct": 0.04
+        },
+        {
+          "category": "4",
+          "limitPct": 1.4
+        },
+        {
+          "category": "5A",
+          "limitPct": 0.06
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.05
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.05
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.017
+        },
+        {
+          "category": "6",
+          "limitPct": 0,
+          "condition": "Prohibited"
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.04
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.04
+        },
+        {
+          "category": "8",
+          "limitPct": 0.017
+        },
+        {
+          "category": "9",
+          "limitPct": 0.1
+        },
+        {
+          "category": "10A",
+          "limitPct": 0.1
+        },
+        {
+          "category": "10B",
+          "limitPct": 0.63
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.017
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.017
+        },
+        {
+          "category": "12",
+          "limitPct": 16
+        }
+      ],
+      "conditions": "",
+      "notes": "IFRA 现行标准为 Restriction(Amendment 49),Category 1 与 6 禁用;EU 化妆品法规(EC 1223/2009 Annex II, Regulation 2021/1902)2022-03-01 起全面禁用",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_015.pdf, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-limonene",
+      "name": "Limonene",
+      "cas": [
+        "5989-27-5"
+      ],
+      "restrictionType": "specification",
+      "amendment": "29",
+      "stdDoc": "IFRA_STD_186.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION",
+      "limits": [],
+      "conditions": "Specification 型:对原料品质/过氧化物控制提出规格要求,无限量数值表",
+      "notes": "具体规格参数(过氧化物限值等)待补录,见 STD 186",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_186.pdf, Amendment 29)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-linalool",
+      "name": "Linalool",
+      "cas": [
+        "78-70-6"
+      ],
+      "restrictionType": "specification",
+      "amendment": "38",
+      "stdDoc": "IFRA_STD_187.pdf",
+      "drivingProperty": "DERMAL SENSITIZATION",
+      "limits": [],
+      "conditions": "Specification 型:对原料品质/过氧化物控制提出规格要求,无限量数值表",
+      "notes": "具体规格参数(过氧化物限值等)待补录,见 STD 187",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_187.pdf, Amendment 38)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-lyral",
+      "name": "3 and 4-(4-Hydroxy-4-methylpentyl)-3-cyclohexene-1-carboxaldehyde (HMPCC)",
+      "cas": [
+        "31906-04-4"
+      ],
+      "restrictionType": "quantitative",
+      "amendment": "49",
+      "stdDoc": "IFRA 51st 合集 HMPCC 标准",
+      "drivingProperty": "DERMAL SENSITIZATION",
+      "limits": [
+        {
+          "category": "1",
+          "limitPct": 0.02
+        },
+        {
+          "category": "2",
+          "limitPct": 0.02
+        },
+        {
+          "category": "3",
+          "limitPct": 0.1
+        },
+        {
+          "category": "4",
+          "limitPct": 0.2
+        },
+        {
+          "category": "5A",
+          "limitPct": 0.2
+        },
+        {
+          "category": "5B",
+          "limitPct": 0.2
+        },
+        {
+          "category": "5C",
+          "limitPct": 0.2
+        },
+        {
+          "category": "5D",
+          "limitPct": 0.067
+        },
+        {
+          "category": "6",
+          "limitPct": 0.2
+        },
+        {
+          "category": "7A",
+          "limitPct": 0.02
+        },
+        {
+          "category": "7B",
+          "limitPct": 0.02
+        },
+        {
+          "category": "8",
+          "limitPct": 0.067
+        },
+        {
+          "category": "9",
+          "limitPct": 0.2
+        },
+        {
+          "category": "10A",
+          "limitPct": 0.2
+        },
+        {
+          "category": "10B",
+          "limitPct": 0.2
+        },
+        {
+          "category": "11A",
+          "limitPct": 0.067
+        },
+        {
+          "category": "11B",
+          "limitPct": 0.067
+        },
+        {
+          "category": "12",
+          "limitPct": 91
+        }
+      ],
+      "conditions": "",
+      "notes": "非 QRA 务实限值;EU(Regulation 2017/1410, Annex II)2021-08-23 起全面禁用",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA 51st 合集 HMPCC 标准, Amendment 49)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-musk-ketone",
+      "name": "Musk ketone",
+      "cas": [
+        "81-14-1"
+      ],
+      "restrictionType": "specification",
+      "amendment": "45",
+      "stdDoc": "IFRA_STD_189.pdf",
+      "drivingProperty": "SEE FRAGRANCE INGREDIENT SPECIFICATION",
+      "limits": [],
+      "conditions": "仅当 musk xylene 含量 <0.1% 时方可使用",
+      "notes": "无限量数值表",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_189.pdf, Amendment 45)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    },
+    {
+      "id": "ifra-musk-xylene",
+      "name": "Musk xylene",
+      "cas": [
+        "81-15-2"
+      ],
+      "restrictionType": "prohibition",
+      "amendment": "44",
+      "stdDoc": "IFRA_STD_170.pdf",
+      "drivingProperty": "VPvB",
+      "limits": [],
+      "conditions": "不得作为香原料使用;仅可作为 musk ketone 中 <0.1% 的杂质存在",
+      "notes": "全类别禁用",
+      "provenance": {
+        "sources": [
+          "人工核对报告 2026-09-21(IFRA_STD_170.pdf, Amendment 44)"
+        ],
+        "humanVerified": true,
+        "verifiedBy": "人工核对",
+        "verifiedAt": "2026-09-21"
+      }
+    }
+  ]
+}

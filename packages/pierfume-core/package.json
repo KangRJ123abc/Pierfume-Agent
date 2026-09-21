@@ -1,0 +1,16 @@
+{
+  "name": "pierfume-core",
+  "version": "0.1.0",
+  "description": "Pierfume Agent — 调香师副驾驶核心 Pi package:配方工作台、formula-lint、ifra-check",
+  "keywords": ["pi-package", "flavor", "fragrance", "ifra", "perfumery"],
+  "license": "MIT",
+  "pi": {
+    "extensions": ["./extensions"],
+    "skills": ["./skills"],
+    "prompts": ["./prompts"]
+  },
+  "scripts": {
+    "validate-data": "node scripts/validate-data.mjs",
+    "validate-data:self": "node scripts/validate-data.mjs --selftest"
+  }
+}
