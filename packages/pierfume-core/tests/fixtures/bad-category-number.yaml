@@ -1,0 +1,12 @@
+# 坏夹具:product.category 未加引号 → YAML 解析为数字 4,schema 期望字符串
+meta:
+  id: fm-bad-category-number
+  name: 类别未加引号
+  version: "0.1.0"
+product:
+  category: 4
+formula:
+  - materialRef: hedione
+    pct: 50
+  - materialRef: ethanol
+    pct: 50

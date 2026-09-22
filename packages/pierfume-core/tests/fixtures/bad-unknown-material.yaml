@@ -1,0 +1,14 @@
+# 坏夹具:materialRef 引用了原料库中不存在的 id
+meta:
+  id: fm-bad-unknown-material
+  name: 未知原料
+  version: "0.1.0"
+product:
+  category: "4"
+formula:
+  - materialRef: hedione
+    pct: 40
+  - materialRef: iso-e-super
+    pct: 10
+  - materialRef: ethanol
+    pct: 50

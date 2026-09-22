@@ -1,0 +1,38 @@
+# 示例配方:柑橘古龙水
+# materialRef 引用 data/materials.sample.json 的原料 id;各 pct 合计 = 100。
+# product.category 必须加引号(YAML 中 4 是数字,'4' 才是字符串)。
+meta:
+  id: fm-citrus-cologne
+  name: 柑橘古龙水
+  version: "0.1.0"
+  author: 调香师 B
+  createdAt: 2026-09-21
+  status: draft
+  notes: D2 阶段测试配方之一,验证 formula-lint
+
+product:
+  name: 柑橘古龙水
+  category: "4"
+  fragranceUseLevelPct: 5    # 古龙水添加量较低(3–8%)
+
+formula:
+  - materialRef: limonene
+    pct: 30
+    notes: 柑橘主香
+  - materialRef: linalool
+    pct: 12
+  - materialRef: hedione
+    pct: 8
+  - materialRef: geraniol
+    pct: 5
+  - materialRef: hydroxycitronellal
+    pct: 3
+  - materialRef: citral
+    pct: 1.5
+  - materialRef: coumarin
+    pct: 1
+  - materialRef: vanillin
+    pct: 0.5
+  - materialRef: ethanol
+    pct: 39
+    notes: 载体

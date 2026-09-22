@@ -1,0 +1,14 @@
+# 坏夹具:剂量合计 80%,超出 100±1 容差
+meta:
+  id: fm-bad-sum
+  name: 总量溢出
+  version: "0.1.0"
+product:
+  category: "4"
+formula:
+  - materialRef: hedione
+    pct: 40
+  - materialRef: vanillin
+    pct: 10
+  - materialRef: ethanol
+    pct: 30

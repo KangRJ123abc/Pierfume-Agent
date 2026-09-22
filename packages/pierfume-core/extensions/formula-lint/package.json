@@ -1,0 +1,17 @@
+{
+  "name": "pierfume-formula-lint",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Pierfume 配方 YAML 校验扩展(命令 /formula-lint + 工具 formula_lint)",
+  "type": "module",
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "dependencies": {
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "0.85.1",
+    "typebox": "1.3.27"
+  }
+}

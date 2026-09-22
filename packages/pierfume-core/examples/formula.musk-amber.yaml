@@ -1,0 +1,39 @@
+# 示例配方:麝香琥珀 EDP
+# materialRef 引用 data/materials.sample.json 的原料 id;各 pct 合计 = 100。
+# product.category 必须加引号。
+meta:
+  id: fm-musk-amber
+  name: 麝香琥珀 EDP
+  version: "0.1.0"
+  author: 调香师 B
+  createdAt: 2026-09-21
+  status: draft
+  notes: D2 阶段测试配方之一,验证 formula-lint
+
+product:
+  name: 麝香琥珀淡香精
+  category: "4"
+  fragranceUseLevelPct: 15
+
+formula:
+  - materialRef: benzyl-salicylate
+    pct: 15
+  - materialRef: alpha-isomethyl-ionone
+    pct: 10
+  - materialRef: musk-ketone
+    pct: 6
+  - materialRef: hydroxycitronellal
+    pct: 5
+  - materialRef: vanillin
+    pct: 4
+  - materialRef: coumarin
+    pct: 3
+  - materialRef: methyl-anthranilate
+    pct: 2
+  - materialRef: eugenol
+    pct: 2
+  - materialRef: cinnamal
+    pct: 0.2
+  - materialRef: ethanol
+    pct: 52.8
+    notes: 载体

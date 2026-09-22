@@ -1,0 +1,14 @@
+# 坏夹具:同一 materialRef 重复出现两次
+meta:
+  id: fm-bad-duplicate
+  name: 重复原料
+  version: "0.1.0"
+product:
+  category: "4"
+formula:
+  - materialRef: hedione
+    pct: 40
+  - materialRef: hedione
+    pct: 10
+  - materialRef: ethanol
+    pct: 50

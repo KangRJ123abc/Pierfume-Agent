@@ -1,0 +1,12 @@
+# 坏夹具:YAML 语法错误(未闭合的方括号)
+meta:
+  id: fm-bad-syntax
+  name: 语法错误
+  version: "0.1.0"
+product:
+  category: "4"
+formula:
+  - materialRef: hedione
+    pct: [50
+  - materialRef: ethanol
+    pct: 50
