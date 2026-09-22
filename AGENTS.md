@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-22(D2 已提交 7c2c62e、E2E 全绿;网络卡点解除,进入 D3 的状态快照)。
+> 更新:2026-09-22(D3 ifra-check 完成、三层测试 26 断言全绿;合规断言待人工确认后提交,见 §3/§9)。
 
 ## 1. 项目一句话
 
@@ -14,14 +14,14 @@ Pierfume_Agent/
 ├── pi/                       # 底座源码(v0.85.1+87,已构建成功,只读参考)
 ├── packages/pierfume-core/   # 主 pi package(本项目的开发主场)
 │   ├── extensions/
-│   │   ├── formula-lint/    # 已实现(with-deps 结构:package.json + index.ts;node_modules 不入 git)
-│   │   └── ifra-check/      # 骨架,未实现
+│   │   ├── formula-lint/    # 已实现(D2,提交 7c2c62e;with-deps:package.json + index.ts;node_modules 不入 git)
+│   │   └── ifra-check/      # 已实现(D3,待提交;命令 /ifra-check + 工具 ifra_check,Markdown/JSON 双输出)
 │   ├── skills/  prompts/                        # 占位
 │   ├── schemas/{materials,ifra-rules,formula}.schema.json
 │   ├── data/{materials.sample.json, ifra-rules.json, _cas-draft.json}
-│   ├── examples/   # 3 个好配方:formula.example / citrus-cologne / musk-amber .yaml
-│   ├── tests/fixtures/  # 5 个坏夹具:bad-unknown-material/sum/duplicate/category-number/syntax
-│   ├── scripts/{schema-validator, formula-lint-core, validate-data, validate-formula, fetch-cas, build-materials}.mjs
+│   ├── examples/   # 3 个好配方:formula.example / citrus-cologne / musk-amber .yaml(均 IFRA 合规)
+│   ├── tests/fixtures/  # lint 坏夹具 5 个 + ifra 夹具 5 个(3 违规/1 边界合规/1 specification 提示)
+│   ├── scripts/{schema-validator, formula-lint-core, validate-data, validate-formula, ifra-check-core, ifra-check, fetch-cas, build-materials}.mjs
 │   └── docs/{data-verification-checklist, data-verification-report-2026-09-21}.md
 ├── docs/Pierfume-Agent-项目初始文档.md
 └── AGENTS.md                 # 本文件
@@ -43,7 +43,13 @@ Pierfume_Agent/
   - 3 好配方(example/citrus-cologne/musk-amber)+ 5 坏夹具(tests/fixtures/,各注入一类错误)
   - `tests/formula-lint.e2e.mjs`:A 单元/B CLI/C pi E2E 三层;`npm run test:formula-lint`
   - E2E 实测结论见 §7.3(网络已通,扩展真实分发成功)
-- [ ] **ifra-check 扩展** —— D3–D4
+- [~] **ifra-check 扩展(D3)**:代码完成、三层测试 26 断言全绿,**合规断言待人工确认后提交(红线 5)**。已完成:
+  - `scripts/ifra-check-core.mjs`:共享核查核心 —— formula-lint 前置 → 成品口径换算(pct × fragranceUseLevelPct/100)→ quantitative/prohibition/specification 三型判定;不硬编码任何限量(单一事实来源 data/ifra-rules.json)
+  - `scripts/ifra-check.mjs`:CLI(Markdown 默认,`--json` 输出 JSON,退出码 0/1)
+  - `extensions/ifra-check/`:命令 `/ifra-check`(Markdown 报告:超标项/限量依据/建议调整)+ 工具 `ifra_check`(摘要 + JSON details)
+  - `tests/fixtures/ifra-*.yaml` 5 个:lilial Cat1 禁用、lyral Cat4 超量、cinnamal 恰界合规、musk-xylene 全类禁用、specification 仅提示
+  - `tests/ifra-check.e2e.mjs`:A 单元/B CLI/C pi E2E;`npm run test:ifra-check`
+  - 3 个存量示例配方实测均 IFRA 合规(仅有 specification/no-entry 提示)
 - [ ] **打包为 pi package 验证 `pi install`** —— D5
 
 ## 4. 数据现状与缺口
@@ -77,12 +83,15 @@ Pierfume_Agent/
 cd packages/pierfume-core && npm run validate-data        # 校验
 npm run validate-data:self                                # 自测 + 校验
 npm run validate-formula [-- path/to/f.yaml]              # 校验配方(默认示例;支持绝对路径)
+npm run check-ifra [-- path/to/f.yaml]                    # IFRA 合规报告(Markdown;--json 出 JSON)
 
 # 扩展/包最终要能 pi install;本地验证方式
 cd pi && node packages/coding-agent/dist/bundle/cli.js --help
 
-# 配方/扩展测试(3 好 5 坏,三层:单元/CLI/pi E2E;E2E 需 DEEPSEEK_API_KEY)
+# 配方/扩展测试(三层:单元/CLI/pi E2E;E2E 需 DEEPSEEK_API_KEY)
+npm test                                                  # formula-lint + ifra-check 全量(50 断言)
 npm run test:formula-lint
+npm run test:ifra-check
 PIERFUME_SKIP_PI_E2E=1 npm run test:formula-lint     # 只跑离线两层
 
 # pi CLI 加载真实扩展(print 模式 E2E;务必 < /dev/null 且重定向到文件)
@@ -134,7 +143,7 @@ MSYS_NO_PATHCONV=1 node ../../pi/packages/coding-agent/dist/bundle/cli.js --offl
 
 1. [x] ~~定义**配方 YAML Schema**~~(D1,提交 87952e0)
 2. [x] ~~**formula-lint 扩展**~~(D2,提交 7c2c62e;网络验证 + 三层测试 24 断言全绿,见 §7.3)
-3. 实现 **ifra-check** 扩展 + Markdown/JSON 双输出合规报告—— D3
-4. 打包验证 `pi install` + 端到端 demo—— D5
+3. [~] **ifra-check 扩展(D3)** —— 代码完成、测试全绿,**待人工确认合规断言后提交**(红线 5;断言表见 tests/ifra-check.e2e.mjs 用例注释)
+4. 打包验证 `pi install` + 端到端 demo—— D5(MVP 验收 §3.2:10 个测试配方含超标样本全部判对 —— 当前 8 配方,补齐 10 个留 D6–D7 回归)
 5. [x] ~~git init~~(首个提交 aa88e64)
 6. 测试断言需基于人工核对后的数据,编写时向用户确认
