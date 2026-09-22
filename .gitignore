@@ -12,4 +12,7 @@ dist/
 .DS_Store
 Thumbs.db
 
+# pi 项目级安装状态(本地开发用;用户级安装在 ~/.pi,不受影响)
+.pi/
+
 # 本地临时/草稿数据(审计依据 _cas-draft.json 需保留,不入 gitignore)

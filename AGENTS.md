@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-22(D3 已提交 4857dff、合规断言已确认;双套件 50 断言全绿。下一步 D5 打包验证)。
+> 更新:2026-09-22(D5 完成:pi install 双 scope 验证 + 真实 brief 端到端 demo 通过;双套件 50 断言全绿)。
 
 ## 1. 项目一句话
 
@@ -50,7 +50,11 @@ Pierfume_Agent/
   - `tests/fixtures/ifra-*.yaml` 5 个:lilial Cat1 禁用、lyral Cat4 超量、cinnamal 恰界合规、musk-xylene 全类禁用、specification 仅提示
   - `tests/ifra-check.e2e.mjs`:A 单元/B CLI/C pi E2E;`npm run test:ifra-check`
   - 3 个存量示例配方实测均 IFRA 合规(仅有 specification/no-entry 提示)
-- [ ] **打包为 pi package 验证 `pi install`** —— D5
+- [x] **打包验证 `pi install` + 真实 brief 端到端 demo(D5,2026-09-22)**:双 scope 均验证通过,机制细节见 §7.4
+  - 项目级:`pi install ./packages/pierfume-core -l` → 仓库根 `.pi/settings.json`(已 gitignore)
+  - 用户级:`pi install <绝对路径>` → `~/.pi/agent/settings.json`,neutral cwd 实测 `/formula-lint`、`/ifra-check` 真实分发
+  - 真实 brief demo:Agent 读原料库 → 生成 12 原料配方 → `formula_lint` ✅ + `ifra_check` ✅ → `status: approved`;独立 CLI 复验双通
+  - 新增 `packages/pierfume-core/README.md`(安装/CLI/红线)
 
 ## 4. 数据现状与缺口
 
@@ -101,6 +105,11 @@ cd packages/pierfume-core
 MSYS_NO_PATHCONV=1 node ../../pi/packages/coding-agent/dist/bundle/cli.js --offline -nt \
   -e extensions/formula-lint "/formula-lint examples/formula.example.yaml" \
   < /dev/null > /tmp/out.log 2>&1; echo $?
+
+# pi package 安装(D5 已验证,机制见 §7.4)
+pi install ./packages/pierfume-core -l     # 项目级(仅仓库根 cwd 加载,运行需 -a;.pi/ 已 gitignore)
+pi install "D:\...\packages\pierfume-core" # 用户级(任意 cwd 可用,建议绝对路径;已装入本机)
+pi list -a                                 # 查看项目级包(不加 -a 只列用户级)
 ```
 
 ## 7. 环境、网络变通与当前卡点
@@ -124,6 +133,13 @@ MSYS_NO_PATHCONV=1 node ../../pi/packages/coding-agent/dist/bundle/cli.js --offl
 - **备忘 2(print 模式流语义)**:扩展 `console.log` 走 **stderr**(stdout 留给模型最终答复);进程退出码只反映模型调用成功与否,**不反映校验结果** → E2E 必须断言输出标记(✅/❌ + 错误签名)
 - **备忘 3(防模型代跑)**:E2E 加 `-nt`(禁全部工具),模型无法借 bash/edit 干预,输出只剩扩展的确定性行;不加 `-nt` 时模型可能自行"完成"任务,造成验证假象(2026-09-22 实测踩过:模型自行改写 validate-formula.mjs, luckily 结果符合 D2 设计,经回归后保留)
 
+### 7.4 pi install 机制实测备忘(D5,2026-09-22)
+- 两种 scope:`pi install <src> -l` → 项目级 `<cwd>/.pi/settings.json`;不加 `-l` → 用户级 `~/.pi/agent/settings.json`。local 源**不拷贝**,settings 只记源路径、运行时原地加载(相对路径以 settings 所在目录为基)
+- **项目级只在该 cwd 恰好是含 `.pi/` 的目录时加载**(settings-manager 只查 `<cwd>/.pi/`,不向上走),且每次运行需 `-a` 信任项目文件;`pi list` 也要 `-a` 才列出项目级包
+- **用户级任意 cwd 可用**;local 源建议给绝对路径(相对路径会按 `~/.pi/agent` 解析,易错)
+- 包发现:`pi.extensions` 指向目录时,按子目录 package.json 的 `pi.extensions`/index.ts 递归发现(with-deps 扩展各自带 node_modules,原地加载可用)
+- 卸载:`pi uninstall <source> [-l]`;当前用户级与项目级均已装 pierfume-core
+
 ## 8. 设计决策备忘
 
 - **单一事实来源**:限量数值只存在 `data/ifra-rules.json`;materials 通过 `ifraEntryRef` 引用,禁止抄录限量数值到原料表
@@ -144,6 +160,6 @@ MSYS_NO_PATHCONV=1 node ../../pi/packages/coding-agent/dist/bundle/cli.js --offl
 1. [x] ~~定义**配方 YAML Schema**~~(D1,提交 87952e0)
 2. [x] ~~**formula-lint 扩展**~~(D2,提交 7c2c62e;网络验证 + 三层测试 24 断言全绿,见 §7.3)
 3. [x] ~~**ifra-check 扩展(D3)**~~(提交 4857dff;合规断言 2026-09-22 经人工确认,红线 5)
-4. 打包验证 `pi install` + 端到端 demo—— D5(MVP 验收 §3.2:10 个测试配方含超标样本全部判对 —— 当前 8 配方,补齐 10 个留 D6–D7 回归)
+4. [x] ~~打包验证 `pi install` + 端到端 demo~~(D5,2026-09-22;双 scope 安装验证 + 真实 brief demo 通过,见 §3/§7.4)
 5. [x] ~~git init~~(首个提交 aa88e64)
 6. 测试断言需基于人工核对后的数据,编写时向用户确认
