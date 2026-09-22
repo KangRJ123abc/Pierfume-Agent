@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-21(D2 代码完成、卡在网络验证的状态快照)。
+> 更新:2026-09-22(D2 已提交 7c2c62e、E2E 全绿;网络卡点解除,进入 D3 的状态快照)。
 
 ## 1. 项目一句话
 
@@ -27,7 +27,7 @@ Pierfume_Agent/
 └── AGENTS.md                 # 本文件
 ```
 
-## 3. 当前进度(2026-09-21)
+## 3. 当前进度(2026-09-22)
 
 - [x] **底座环境**:pi 克隆 + 构建成功 + CLI 可用(`node packages/coding-agent/dist/bundle/cli.js --version` → 0.85.1)
 - [x] **数据 Schema**:materials + ifra-rules 双 JSON Schema
@@ -36,12 +36,13 @@ Pierfume_Agent/
 - [x] **IFRA 规则表**:18 条带真实限量数值(来自 IFRA 官方 STD 文档,逐条标注 `stdDoc`/`amendment`/`drivingProperty`),全部人工核对
 - [x] **git 仓库初始化**(2026-09-21,首个提交 aa88e64;pi/ 自带独立仓库,已 gitignore)
 - [x] **配方 YAML Schema**(D1):`schemas/formula.schema.json` + 示例 `examples/formula.example.yaml` + 校验脚本 `validate-formula.mjs`(schema 校验 + materialRef 跨文件引用 + 重复原料 + 总量归一 ±1;负向测试 4 类错误全部拦截)。设计:product.category(加引号的字符串)决定 ifra-check 适用限量列;fragranceUseLevelPct(缺省 100)换算浓缩物→成品
-- [~] **formula-lint 扩展(D2)**:代码已完成,**端到端验证被网络阻塞,尚未提交**。已完成:
+- [x] **formula-lint 扩展(D2,提交 7c2c62e)**:三层测试全绿(24 断言)。已完成:
   - `scripts/formula-lint-core.mjs`:零副作用共享校验核心(YAML→schema→materialRef→重复→总量 ±1),CLI 与扩展共用
   - `scripts/schema-validator.mjs`:从 validate-data 抽出的共享迷你 Schema 校验器
   - `extensions/formula-lint/`:with-deps 目录结构(自带 package.json 声明 yaml 依赖),`index.ts` 同时注册命令 `/formula-lint <file...>` 与工具 `formula_lint`(TypeBox 参数,LLM 强制校验)
   - 3 好配方(example/citrus-cologne/musk-amber)+ 5 坏夹具(tests/fixtures/,各注入一类错误)
-  - CLI 层(`npm run validate-formula`)回归通过;**pi CLI 加载真实扩展的 E2E 未跑通,见 §7 卡点**
+  - `tests/formula-lint.e2e.mjs`:A 单元/B CLI/C pi E2E 三层;`npm run test:formula-lint`
+  - E2E 实测结论见 §7.3(网络已通,扩展真实分发成功)
 - [ ] **ifra-check 扩展** —— D3–D4
 - [ ] **打包为 pi package 验证 `pi install`** —— D5
 
@@ -80,9 +81,15 @@ npm run validate-formula [-- path/to/f.yaml]              # 校验配方(默认�
 # 扩展/包最终要能 pi install;本地验证方式
 cd pi && node packages/coding-agent/dist/bundle/cli.js --help
 
-# pi CLI 加载真实扩展(print 模式 E2E;务必 < /dev/null 且重定向到文件取真实退出码)
+# 配方/扩展测试(3 好 5 坏,三层:单元/CLI/pi E2E;E2E 需 DEEPSEEK_API_KEY)
+npm run test:formula-lint
+PIERFUME_SKIP_PI_E2E=1 npm run test:formula-lint     # 只跑离线两层
+
+# pi CLI 加载真实扩展(print 模式 E2E;务必 < /dev/null 且重定向到文件)
+# 注意:Git Bash 必须 MSYS_NO_PATHCONV=1,否则 /formula-lint 被转成 D:/ruanjian/Git/...;
+# -nt 禁止模型动工具(防其借 bash 工具"代跑"并改文件);扩展输出走 stderr
 cd packages/pierfume-core
-node ../../pi/packages/coding-agent/dist/bundle/cli.js --offline \
+MSYS_NO_PATHCONV=1 node ../../pi/packages/coding-agent/dist/bundle/cli.js --offline -nt \
   -e extensions/formula-lint "/formula-lint examples/formula.example.yaml" \
   < /dev/null > /tmp/out.log 2>&1; echo $?
 ```
@@ -101,14 +108,12 @@ node ../../pi/packages/coding-agent/dist/bundle/cli.js --offline \
 - **模型名用 `deepseek-flash`**(DeepSeek V4.1 Flash,推理模型);**禁用 v3 系列(已下架)**。pi 自带目录快照是旧名 `deepseek-v4-flash`,新名来源:pi 仓库 `packages/ai/scripts/generate-models.ts` 内联定义
 - 已写 `~/.pi/agent/models.json`:覆盖内置 deepseek provider,`apiKey:"$DEEPSEEK_API_KEY"`,按 id upsert 加入 deepseek-flash(内置模型保留)
 
-### 7.3 ⚠️ 当前卡点:pi CLI 所有运行都返回 `Request timed out.`(真实退出码 1)
-- `Request timed out.` = SDK 的 `APIConnectionTimeoutError`(在 dist/bundle/chunks/* 中),客户端连接 provider 端点超时
-- 三种运行全部同样失败:① `/formula-lint`(加载我们扩展);② **零依赖探针扩展 `/probe`**(只 console.log);③ **无扩展普通 prompt `-p`**
-- 关键矛盾:命令分发(`agent-session.ts:1237` `_tryExecuteExtensionCommand`,print 模式 bind 在 `print-mode.ts:74`)**先于**模型/认证,命令被找到就不该有网络请求;但探针也超时 → 两种未排除的假设:
-  1. **沙箱 shell 网络不通 api.deepseek.com**(与 GitHub 直连同类;用户本人终端可能通),且启动链路某处在 prompt 前阻塞(待查:`main.ts:790` `resolveModelScope` 带 15s AbortSignal、startup 是否有别的 provider 调用)
-  2. 扩展/命令在 print 模式下未成功注册分发(但扩展加载错误会进 diagnostics 打印,实测无任何诊断输出)
-- 已排除:stdin 阻塞(已 `< /dev/null`)、扩展加载报错(无 diagnostics)、"no models available"(未出现 → session.model 存在,models.json 生效)
-- **下一步**:① `curl -m 8 https://api.deepseek.com/` 实测沙箱通达性(上次被中断);② 若沙箱不通,请用户在自己终端跑同一条命令,或给沙箱加代理;③ 网络确认后依次重跑探针 → formula-lint → 编写 E2E 测试脚本(3 好 5 坏)→ 提交 D2
+### 7.3 卡点已解除(2026-09-22):网络通,扩展 E2E 全绿;三条实测备忘
+- **结论**:2026-09-21 的 `Request timed out.` 是环境网络问题,已消失:`curl https://api.deepseek.com/` → HTTP 401(0.23s,未授权属正常响应);`DEEPSEEK_API_KEY` 与 `~/.pi/agent/models.json` 均生效
+- **E2E 实测**:`/formula-lint` 在 pi CLI print 模式真实分发,3 好 5 坏全部符合预期(`npm run test:formula-lint`,24 断言全绿,提交 7c2c62e)
+- **备忘 1(Git Bash 路径转换)**:直接传 `"/formula-lint ..."` 会被 MSYS 转成 `D:/ruanjian/Git/formula-lint ...`(以为是无盘符 POSIX 路径),命令静默不分发、模型拿错路径"自由发挥"(甚至借工具代跑、改文件)。对策:`MSYS_NO_PATHCONV=1`,或像测试脚本那样用 node `spawnSync` 传参(不经 MSYS)
+- **备忘 2(print 模式流语义)**:扩展 `console.log` 走 **stderr**(stdout 留给模型最终答复);进程退出码只反映模型调用成功与否,**不反映校验结果** → E2E 必须断言输出标记(✅/❌ + 错误签名)
+- **备忘 3(防模型代跑)**:E2E 加 `-nt`(禁全部工具),模型无法借 bash/edit 干预,输出只剩扩展的确定性行;不加 `-nt` 时模型可能自行"完成"任务,造成验证假象(2026-09-22 实测踩过:模型自行改写 validate-formula.mjs, luckily 结果符合 D2 设计,经回归后保留)
 
 ## 8. 设计决策备忘
 
@@ -128,7 +133,7 @@ node ../../pi/packages/coding-agent/dist/bundle/cli.js --offline \
 ## 9. 待办与下一步
 
 1. [x] ~~定义**配方 YAML Schema**~~(D1,提交 87952e0)
-2. [~] **formula-lint 扩展** —— D2 代码已完成(见 §3),**待网络验证**:curl 测 api.deepseek.com → 用户终端代跑/加代理 → 探针 → `/formula-lint` 3 好 5 坏 E2E → 编写测试脚本 → **提交 D2**
+2. [x] ~~**formula-lint 扩展**~~(D2,提交 7c2c62e;网络验证 + 三层测试 24 断言全绿,见 §7.3)
 3. 实现 **ifra-check** 扩展 + Markdown/JSON 双输出合规报告—— D3
 4. 打包验证 `pi install` + 端到端 demo—— D5
 5. [x] ~~git init~~(首个提交 aa88e64)
