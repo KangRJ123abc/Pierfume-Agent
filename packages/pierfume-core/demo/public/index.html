@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pierfume · 调香师副驾驶</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+</head>
+<body>
+<header class="site-header">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 3C16 3 7 14 7 20a9 9 0 0 0 18 0C25 14 16 3 16 3Z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M12 20a4 4 0 0 0 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h1>Pierfume <span class="thin">·</span> 调香师副驾驶</h1>
+      <p class="tagline">配方工作台 —— 生成 / 校验 / IFRA 合规</p>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" id="tab-generate" role="tab">Brief 生成配方</button>
+    <button class="tab" id="tab-validate" role="tab">配方校验</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ 生成页 ============ -->
+  <section id="view-generate" class="view">
+    <div class="grid">
+      <div class="card control-card">
+        <h2>客户 Brief</h2>
+        <label class="field">
+          <span>描述想要的香气</span>
+          <textarea id="brief" rows="4" placeholder="例:清新柑橘绿茶古龙水,明亮开场,茶韵收尾…"></textarea>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>IFRA 类别</span>
+            <select id="category"></select>
+          </label>
+          <label class="field">
+            <span>香精添加量(%)</span>
+            <input id="useLevel" type="number" min="0.5" max="100" step="0.5" value="5">
+          </label>
+        </div>
+        <button id="btn-generate" class="btn primary">生成配方</button>
+        <div id="generate-progress" class="progress hidden">
+          <div class="spinner"></div>
+          <p id="progress-text">正在调用调香师副驾驶(读原料库 → 写配方 → 工具链校验)…</p>
+        </div>
+        <div class="palette-block">
+          <h3>原料库速览 <small id="palette-count"></small></h3>
+          <div id="palette" class="palette"></div>
+        </div>
+      </div>
+
+      <div class="results" id="generate-results">
+        <div class="empty-hint card">
+          <p>填写 brief 后点击「生成配方」。</p>
+          <p class="muted">Agent 将只使用原料库中的原料,创建配方后强制经过 formula_lint 与 ifra_check 两道工具链校验;本页展示的合规结论由本地 CLI 独立复验,不采信模型自述。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 校验页 ============ -->
+  <section id="view-validate" class="view hidden">
+    <div class="grid">
+      <div class="card control-card">
+        <h2>配方 YAML</h2>
+        <div class="example-btns" id="example-btns"></div>
+        <label class="field">
+          <textarea id="yaml-input" rows="16" spellcheck="false" placeholder="粘贴配方 YAML,或点上方按钮载入示例"></textarea>
+        </label>
+        <button id="btn-validate" class="btn primary">本地校验(秒回)</button>
+        <p class="muted small">纯本地执行:formula-lint(结构/引用/总量)+ ifra-check(IFRA 合规),不调用模型。</p>
+      </div>
+      <div class="results" id="validate-results">
+        <div class="empty-hint card"><p>粘贴配方或载入示例后点击「本地校验」。</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>合规结论基于本地 IFRA 规则表快照(51st Amendment),商用前必须以正版 IFRA Standard 逐条核对。本工具不替代法规意见。</p>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

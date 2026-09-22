@@ -43,6 +43,9 @@ npm run validate-data                      # 数据/schema 校验(改数据后�
 npm run validate-formula -- <file>         # formula-lint CLI(默认示例)
 npm run check-ifra -- <file>               # ifra-check CLI(Markdown;--json 出 JSON)
 npm test                                   # 双套件三层测试共 50 断言
+
+# 本地 GUI demo(atelier 风格,零新依赖)
+npm run demo                               # → http://127.0.0.1:3210(Brief 生成 + 配方校验双页)
 ```
 
 ## 配方 YAML 速览

@@ -1,0 +1,152 @@
+/* Pierfume Demo — atelier 风格:象牙白 + 墨 + 琥珀金 */
+:root {
+  --bg: #f6f1e8;
+  --bg-soft: #fffdf7;
+  --ink: #241d13;
+  --ink-soft: #6f6250;
+  --line: #e4dac6;
+  --amber: #a9741c;
+  --amber-deep: #8a5d12;
+  --gold-grad: linear-gradient(90deg, #caa14a, #a9741c);
+  --good: #3d7a4e;
+  --bad: #b03a2c;
+  --warn: #9a7b1a;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(60, 45, 20, .05), 0 8px 28px rgba(60, 45, 20, .07);
+  --serif: "Noto Serif SC", "Songti SC", "STSong", Georgia, "Times New Roman", serif;
+  --sans: -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 500px at 80% -10%, rgba(202, 161, 74, .10), transparent 60%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.hidden { display: none !important; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 12.5px; }
+
+/* ---------- header ---------- */
+.site-header {
+  max-width: 1180px; margin: 0 auto; padding: 34px 28px 0;
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-mark { width: 40px; height: 40px; color: var(--amber); }
+.brand h1 { font-family: var(--serif); font-size: 26px; margin: 0; letter-spacing: .5px; }
+.brand .thin { color: var(--amber); }
+.tagline { margin: 2px 0 0; color: var(--ink-soft); font-size: 13px; letter-spacing: 2px; }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); }
+.tab {
+  border: none; background: none; padding: 10px 18px; cursor: pointer;
+  font-size: 15px; color: var(--ink-soft); font-family: var(--sans);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab.active { color: var(--ink); border-bottom-color: var(--amber); font-weight: 600; }
+
+/* ---------- layout ---------- */
+main { max-width: 1180px; margin: 22px auto 40px; padding: 0 28px; }
+.grid { display: grid; grid-template-columns: 380px 1fr; gap: 22px; align-items: start; }
+@media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--bg-soft); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px;
+}
+.card h2 { font-family: var(--serif); font-size: 19px; margin: 0 0 14px; }
+.card h3 { font-family: var(--serif); font-size: 15.5px; margin: 18px 0 8px; }
+.card h3 small { color: var(--ink-soft); font-family: var(--sans); font-weight: 400; }
+
+/* ---------- form ---------- */
+.field { display: block; margin-bottom: 14px; }
+.field > span { display: block; font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
+.field textarea, .field input, .field select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: #fff; color: var(--ink); font-family: var(--sans); font-size: 14.5px; resize: vertical;
+}
+.field textarea:focus, .field input:focus, .field select:focus {
+  outline: 2px solid rgba(169, 116, 28, .35); border-color: var(--amber);
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn {
+  border: none; border-radius: 999px; padding: 12px 26px; font-size: 15px; cursor: pointer;
+  font-family: var(--sans); transition: transform .06s ease, box-shadow .2s ease;
+}
+.btn.primary { background: var(--gold-grad); color: #fff; font-weight: 600; letter-spacing: 1px; width: 100%; }
+.btn.primary:hover:not(:disabled) { box-shadow: 0 6px 18px rgba(169, 116, 28, .35); }
+.btn.primary:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ---------- progress ---------- */
+.progress { display: flex; align-items: center; gap: 12px; margin-top: 16px; color: var(--ink-soft); font-size: 13.5px; }
+.spinner {
+  width: 18px; height: 18px; border-radius: 50%; flex: none;
+  border: 2.5px solid var(--line); border-top-color: var(--amber);
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- palette ---------- */
+.palette { display: flex; flex-wrap: wrap; gap: 6px; max-height: 220px; overflow: auto; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 12.5px;
+}
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+.chip .noifra { color: var(--ink-soft); border-bottom: 1px dotted var(--ink-soft); }
+
+/* ---------- results ---------- */
+.results { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.empty-hint { color: var(--ink-soft); }
+.empty-hint p { margin: 6px 0; }
+
+.verdict { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.verdict .badge {
+  font-family: var(--serif); font-size: 17px; padding: 8px 20px; border-radius: 999px; color: #fff;
+}
+.badge.ok { background: var(--good); }
+.badge.bad { background: var(--bad); }
+.badge.warn { background: var(--warn); }
+.verdict .meta { color: var(--ink-soft); font-size: 13.5px; }
+
+table.report { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+table.report th, table.report td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.report th { color: var(--ink-soft); font-weight: 500; font-size: 12.5px; white-space: nowrap; }
+table.report td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.violation td { color: var(--bad); }
+.status-pill { display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: 12px; color: #fff; }
+.status-pill.bad { background: var(--bad); }
+.status-pill.warn { background: var(--warn); }
+
+ul.notices { margin: 8px 0 0; padding-left: 18px; color: var(--ink-soft); font-size: 13px; }
+ul.notices li { margin: 3px 0; }
+
+/* 配方成分条 */
+.formula-list { margin-top: 6px; display: flex; flex-direction: column; gap: 8px; }
+.ingredient { display: grid; grid-template-columns: 180px 1fr 64px; gap: 10px; align-items: center; }
+.ingredient .name { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ingredient .name small { display: block; font-weight: 400; color: var(--ink-soft); font-size: 11.5px; }
+.ingredient .bar { height: 10px; border-radius: 999px; background: #efe7d6; overflow: hidden; }
+.ingredient .bar i { display: block; height: 100%; border-radius: 999px; background: var(--gold-grad); }
+.ingredient .pct { text-align: right; font-variant-numeric: tabular-nums; font-size: 13.5px; color: var(--ink-soft); }
+@media (max-width: 560px) { .ingredient { grid-template-columns: 120px 1fr 52px; } }
+
+details.raw { margin-top: 4px; }
+details.raw summary { cursor: pointer; color: var(--amber-deep); font-size: 13.5px; }
+pre.raw-block {
+  background: #2b2417; color: #f0e8d4; padding: 14px 16px; border-radius: 10px;
+  overflow: auto; font-size: 12.5px; line-height: 1.55; max-height: 380px;
+}
+.error-box { border-left: 3px solid var(--bad); padding: 10px 14px; background: rgba(176, 58, 44, .06); border-radius: 0 8px 8px 0; color: var(--bad); }
+
+.example-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.example-btns button {
+  border: 1px solid var(--line); background: #fff; border-radius: 999px;
+  padding: 4px 12px; font-size: 12.5px; cursor: pointer; color: var(--ink-soft);
+}
+.example-btns button:hover { border-color: var(--amber); color: var(--amber-deep); }
+
+.site-footer { max-width: 1180px; margin: 0 auto; padding: 0 28px 34px; color: var(--ink-soft); font-size: 12.5px; }

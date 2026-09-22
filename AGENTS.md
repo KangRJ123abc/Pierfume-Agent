@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-22(D5 完成:pi install 双 scope 验证 + 真实 brief 端到端 demo 通过;双套件 50 断言全绿)。
+> 更新:2026-09-22(D5 完成 + demo GUI 上线:pi install 双 scope 验证、真实 brief 端到端通过、本地 Web GUI 可玩)。
 
 ## 1. 项目一句话
 
@@ -55,6 +55,10 @@ Pierfume_Agent/
   - 用户级:`pi install <绝对路径>` → `~/.pi/agent/settings.json`,neutral cwd 实测 `/formula-lint`、`/ifra-check` 真实分发
   - 真实 brief demo:Agent 读原料库 → 生成 12 原料配方 → `formula_lint` ✅ + `ifra_check` ✅ → `status: approved`;独立 CLI 复验双通
   - 新增 `packages/pierfume-core/README.md`(安装/CLI/红线)
+- [x] **demo GUI(2026-09-22,随 D5 提交)**:`demo/` 本地 Web 界面,零新依赖(node:http 后端 + 原生 HTML/CSS/JS)
+  - `npm run demo` → http://127.0.0.1:3210(atelier 风格:象牙白/墨/琥珀金,衬线标题)
+  - 两页:「Brief 生成配方」(后端走 pi CLI 同手动 demo 链路,服务端 CLI 独立复验不采信模型自述)+「配方校验」(纯本地秒回)
+  - API 全测 + 浏览器交互实测(载入示例→校验→渲染成分条/合规报告);修 1 处 app.js 语法错(CAT_LABEL 键引号)
 
 ## 4. 数据现状与缺口
 
@@ -97,6 +101,9 @@ npm test                                                  # formula-lint + ifra-
 npm run test:formula-lint
 npm run test:ifra-check
 PIERFUME_SKIP_PI_E2E=1 npm run test:formula-lint     # 只跑离线两层
+
+# demo GUI(零新依赖;另开终端)
+npm run demo                                          # → http://127.0.0.1:3210
 
 # pi CLI 加载真实扩展(print 模式 E2E;务必 < /dev/null 且重定向到文件)
 # 注意:Git Bash 必须 MSYS_NO_PATHCONV=1,否则 /formula-lint 被转成 D:/ruanjian/Git/...;
