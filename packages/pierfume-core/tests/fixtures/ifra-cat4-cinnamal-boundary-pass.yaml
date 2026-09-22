@@ -1,0 +1,25 @@
+# IFRA 正向边界夹具:Category 4 中 cinnamal 恰在限量上(应判合规)
+# 依据:ifra-cinnamal 条目 Category 4 限量 0.25%。
+# 成品中含量 = 5% × 5 / 100 = 0.25% = 限量 → 合规(比较含 1e-9 容差,恰界不判超)。
+meta:
+  id: fm-ifra-cinnamal-boundary
+  name: IFRA 夹具·Cat4 cinnamal 边界
+  version: "0.1.0"
+  status: draft
+  notes: D3 边界夹具,验证"恰等于限量"判合规
+
+product:
+  name: 肉桂古龙水
+  category: "4"
+  fragranceUseLevelPct: 5
+
+formula:
+  - materialRef: cinnamal
+    pct: 5
+  - materialRef: geraniol
+    pct: 5
+  - materialRef: hedione
+    pct: 10
+  - materialRef: ethanol
+    pct: 80
+    notes: 填充至 100

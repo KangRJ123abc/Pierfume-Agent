@@ -14,8 +14,10 @@
     "validate-data:self": "node scripts/validate-data.mjs --selftest",
     "validate-formula": "node scripts/validate-formula.mjs",
     "validate-formula:self": "node scripts/validate-formula.mjs -- examples/formula.example.yaml",
-    "test": "node tests/formula-lint.e2e.mjs",
-    "test:formula-lint": "node tests/formula-lint.e2e.mjs"
+    "check-ifra": "node scripts/ifra-check.mjs",
+    "test": "node tests/formula-lint.e2e.mjs && node tests/ifra-check.e2e.mjs",
+    "test:formula-lint": "node tests/formula-lint.e2e.mjs",
+    "test:ifra-check": "node tests/ifra-check.e2e.mjs"
   },
   "devDependencies": {
     "yaml": "^2.9.0"

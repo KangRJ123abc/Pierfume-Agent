@@ -1,0 +1,23 @@
+# IFRA 提示夹具:仅含 Specification 型原料(linalool/limonene)
+# 依据:ifra-linalool(STD_187)/ ifra-limonene(STD_186)为 specification 型,
+# 无限量数值 → 只给提示,不判违规;ok 应为 true。
+meta:
+  id: fm-ifra-spec-notice
+  name: IFRA 夹具·Specification 提示
+  version: "0.1.0"
+  status: draft
+  notes: D3 提示夹具,验证 specification 型不判违规
+
+product:
+  name: 清新古龙水
+  category: "4"
+  fragranceUseLevelPct: 10
+
+formula:
+  - materialRef: linalool
+    pct: 10
+  - materialRef: limonene
+    pct: 10
+  - materialRef: ethanol
+    pct: 80
+    notes: 填充至 100

@@ -1,0 +1,26 @@
+# IFRA 负向夹具:Category 4 中 lyral 超量(成品口径换算)
+# 依据:ifra-lyral 条目 Category 4 限量 0.2%。
+# 成品中含量 = 1.5% × 20 / 100 = 0.3% > 0.2% → over-limit;
+# 建议上限 = 0.2 × 100 / 20 = 1%(浓缩物中)。
+meta:
+  id: fm-ifra-lyral-cat4
+  name: IFRA 夹具·Cat4 lyral 超量
+  version: "0.1.0"
+  status: draft
+  notes: D3 负向夹具,验证 fragranceUseLevelPct 成品换算与建议上限
+
+product:
+  name: 花香 EDP
+  category: "4"
+  fragranceUseLevelPct: 20
+
+formula:
+  - materialRef: lyral
+    pct: 1.5
+  - materialRef: geraniol
+    pct: 5
+  - materialRef: hedione
+    pct: 10
+  - materialRef: ethanol
+    pct: 83.5
+    notes: 填充至 100

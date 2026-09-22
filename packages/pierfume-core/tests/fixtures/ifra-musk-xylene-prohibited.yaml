@@ -1,0 +1,21 @@
+# IFRA 负向夹具:含全类别禁用原料 musk-xylene
+# 依据:ifra-musk-xylene 条目 restrictionType = prohibition(Amendment 44),
+# 任何类别、任何用量均违规。
+meta:
+  id: fm-ifra-musk-xylene
+  name: IFRA 夹具·含 musk-xylene
+  version: "0.1.0"
+  status: draft
+  notes: D3 负向夹具,验证 prohibition 型(与类别无关)
+
+product:
+  name: 复古麝香香精
+  category: "4"
+  fragranceUseLevelPct: 15
+
+formula:
+  - materialRef: musk-xylene
+    pct: 1
+  - materialRef: ethanol
+    pct: 99
+    notes: 填充至 100

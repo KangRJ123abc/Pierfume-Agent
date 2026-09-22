@@ -1,0 +1,20 @@
+# IFRA 负向夹具:Category 1(唇部护理)含 lilial
+# 依据:ifra-lilial 条目 Category 1 为 Prohibited(limitPct 0),任何用量均违规。
+meta:
+  id: fm-ifra-lilial-cat1
+  name: IFRA 夹具·Cat1 含 lilial
+  version: "0.1.0"
+  status: draft
+  notes: D3 负向夹具,验证 ifra-check 识别 Category 禁用
+
+product:
+  name: 唇膏香精
+  category: "1"
+  fragranceUseLevelPct: 100
+
+formula:
+  - materialRef: lilial
+    pct: 0.5
+  - materialRef: ethanol
+    pct: 99.5
+    notes: 填充至 100

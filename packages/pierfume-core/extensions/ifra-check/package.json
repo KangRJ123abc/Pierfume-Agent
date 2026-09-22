@@ -1,0 +1,17 @@
+{
+  "name": "pierfume-ifra-check",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Pierfume IFRA 合规核查扩展(命令 /ifra-check + 工具 ifra_check)",
+  "type": "module",
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "dependencies": {
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "0.85.1",
+    "typebox": "1.3.27"
+  }
+}
