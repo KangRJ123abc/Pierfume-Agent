@@ -405,8 +405,9 @@ const server = createServer(async (req, res) => {
 		}
 		if (req.method === "GET" && path === "/api/chat/events") {
 			const id = url.searchParams.get("id") ?? "";
-			const chat = chats.get(id);
-			if (!chat) return send(res, 404, { error: "no live chat(先 resume)" });
+			// 目录存在但进程不在内存(如服务器重启)→ 自动恢复,避免前端 404 重连风暴
+			const chat = chats.get(id) ?? (existsSync(join(CHATS_DIR, id)) ? spawnChat(id, { resume: true }) : null);
+			if (!chat) return send(res, 404, { error: "no such chat" });
 			res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" });
 			res.write(": connected\n\n");
 			chat.sse.add(res);
@@ -418,13 +419,24 @@ const server = createServer(async (req, res) => {
 					if (rec.seq > since) res.write(`data: ${JSON.stringify(rec)}\n\n`);
 				}
 			}
-			req.on("close", () => chat.sse.delete(res));
+			const heartbeat = setInterval(() => {
+				try {
+					res.write(": ping\n\n");
+				} catch {
+					/* 连接已断 */
+				}
+			}, 20_000);
+			req.on("close", () => {
+				clearInterval(heartbeat);
+				chat.sse.delete(res);
+			});
 			return;
 		}
 		if (req.method === "POST" && path === "/api/chat/message") {
 			const { id, text } = JSON.parse(await readBody(req));
-			const chat = chats.get(id);
-			if (!chat || chat.dead) return send(res, 410, { error: "chat not live(先 resume)" });
+			// 目录存在即自动恢复(如服务器重启后内存中无此会话)
+			const chat = chats.get(id) ?? (existsSync(join(CHATS_DIR, id)) ? spawnChat(id, { resume: true }) : null);
+			if (!chat || chat.dead) return send(res, 410, { error: "chat not live" });
 			if (chat.busy) return send(res, 409, { error: "agent busy" });
 			if (!chat.name) {
 				chat.name = String(text).slice(0, 24);

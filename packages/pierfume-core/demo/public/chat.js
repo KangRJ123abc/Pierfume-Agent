@@ -64,12 +64,26 @@ function openSSE() {
 	if (chat.es) chat.es.close();
 	const es = new EventSource(`/api/chat/events?id=${chat.sessionId}&since=${chat.lastSeq}`);
 	chat.es = es;
+	let errors = 0;
+	es.onopen = () => {
+		errors = 0;
+	};
 	es.onmessage = (msg) => {
+		errors = 0;
 		let rec;
 		try { rec = JSON.parse(msg.data); } catch { return; }
 		handleRec(rec);
 	};
-	es.onerror = () => setStatus("连接中断,重连中…");
+	es.onerror = () => {
+		errors++;
+		if (errors <= 3) {
+			setStatus("连接中断,重连中…");
+			return;
+		}
+		// 连续失败:停止无意义重连(避免僵尸连接占满浏览器连接数),提示手动恢复
+		es.close();
+		setStatus("连接无法恢复,请重新选择会话或新建会话");
+	};
 }
 
 function setStatus(t) { chat$("#chat-status").textContent = t; }
@@ -91,13 +105,13 @@ function handleRec(rec) {
 		case "extension_ui_request": return onUiRequest(ev);
 		case "agent_settled":
 			chat.busy = false;
-			chat$.querySelector("#btn-chat-send").disabled = false;
+			chat$("#btn-chat-send").disabled = false;
 			chat$("#btn-chat-stop").classList.add("hidden");
 			finalizeStream();
 			return setStatus("就绪");
 		case "agent_start":
 			chat.busy = true;
-			chat$.querySelector("#btn-chat-send").disabled = true;
+			chat$("#btn-chat-send").disabled = true;
 			chat$("#btn-chat-stop").classList.remove("hidden");
 			return setStatus("思考中…");
 	}
@@ -347,12 +361,22 @@ async function sendMessage() {
 		await ensureSession();
 		addBubble("user", text);
 		input.value = "";
-		const r = await fetch("/api/chat/message", {
+		let r = await fetch("/api/chat/message", {
 			method: "POST", headers: { "content-type": "application/json" },
 			body: JSON.stringify({ id: chat.sessionId, text }),
 		});
+		if (r.status === 410) {
+			// 会话不在内存(如服务器重启):恢复一次并重发
+			await api("/api/chat/resume", { id: chat.sessionId });
+			r = await fetch("/api/chat/message", {
+				method: "POST", headers: { "content-type": "application/json" },
+				body: JSON.stringify({ id: chat.sessionId, text }),
+			});
+		}
 		if (r.status === 409) {
 			addBubble("assistant", "⏳ 上一个任务还在进行中,请稍候或点「停止」。");
+		} else if (!r.ok) {
+			addBubble("assistant", `❌ 发送失败(HTTP ${r.status}),请新建会话重试。`);
 		}
 	} catch (e) {
 		setStatus(`发送失败: ${e.message}`);
