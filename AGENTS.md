@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-22(D5 完成 + demo GUI 上线:pi install 双 scope 验证、真实 brief 端到端通过、本地 Web GUI 可玩)。
+> 更新:2026-09-22(配方工作台闭环:formula-diff 改版对比 + 项目禁限用清单 + 报告导出;GUI 增至三页,三套测试 59 断言)。
 
 ## 1. 项目一句话
 
@@ -59,6 +59,12 @@ Pierfume_Agent/
   - `npm run demo` → http://127.0.0.1:3210(atelier 风格:象牙白/墨/琥珀金,衬线标题)
   - 两页:「Brief 生成配方」(后端走 pi CLI 同手动 demo 链路,服务端 CLI 独立复验不采信模型自述)+「配方校验」(纯本地秒回)
   - API 全测 + 浏览器交互实测(载入示例→校验→渲染成分条/合规报告);修 1 处 app.js 语法错(CAT_LABEL 键引号)
+- [x] **配方工作台闭环(2026-09-22)**:改版对比 + 项目禁限用清单 + 报告导出(缺口分析见提交信息)
+  - `formula-diff`:`scripts/formula-diff-core.mjs` + CLI + 扩展命令 `/formula-diff` 与工具 `formula_diff`(挂在 formula-lint 扩展下);结构 diff(调整/新增/移除)+ 两版合规差异(复用 ifra-check-core,不重复限量逻辑)
+  - 项目禁限用清单:cwd 下 `pierfume.project.json`(`{"bannedMaterials": [...]}`)→ formula-lint 项目规则,命中判违规(成本上限因缺原料价格数据未做,数据阻塞)
+  - 报告导出:ifra-check CLI `--out <file>`、扩展 `/ifra-check <file> --out <md>`;GUI 一键下载
+  - GUI 第三页「配方对比」+ 配方库(生成结果入库,各页可载入)+ 静态资源 no-store
+  - `tests/formula-diff.e2e.mjs` 三层 9 断言;三套合计 59 断言全绿
 
 ## 4. 数据现状与缺口
 
@@ -92,6 +98,8 @@ cd packages/pierfume-core && npm run validate-data        # 校验
 npm run validate-data:self                                # 自测 + 校验
 npm run validate-formula [-- path/to/f.yaml]              # 校验配方(默认示例;支持绝对路径)
 npm run check-ifra [-- path/to/f.yaml]                    # IFRA 合规报告(Markdown;--json 出 JSON)
+npm run diff-formula -- old.yaml new.yaml                 # 两版配方对比(结构 diff + 合规差异)
+# 项目禁限用清单:cwd 下放 pierfume.project.json,如 {"bannedMaterials": ["lilial"]}
 
 # 扩展/包最终要能 pi install;本地验证方式
 cd pi && node packages/coding-agent/dist/bundle/cli.js --help

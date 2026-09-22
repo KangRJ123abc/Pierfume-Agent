@@ -15,18 +15,21 @@
  *
  * 说明:引用 humanVerified=false 的原料(未人工核对的初稿)时仅提示,不报错;
  * 测试断言仍应拒绝 unverified 数据。
+ * 项目级规则:若 cwd 下存在 pierfume.project.json(如 {"bannedMaterials": ["lilial"]}),
+ * 命中客户禁限用清单的原料将判违规。
  */
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, isAbsolute } from "node:path";
-import { lintFormulaYaml } from "./formula-lint-core.mjs";
+import { lintFormulaYaml, loadProjectRules } from "./formula-lint-core.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 function main() {
   const args = process.argv.slice(2);
   const files = args.length ? args : ["examples/formula.example.yaml"];
+  const project = loadProjectRules(process.cwd());
 
   let anyError = false;
   for (const file of files) {
@@ -42,7 +45,7 @@ function main() {
       continue;
     }
 
-    const { ok, errors, unverifiedRefs, ingredientCount } = lintFormulaYaml(raw, label);
+    const { ok, errors, unverifiedRefs, ingredientCount } = lintFormulaYaml(raw, label, project);
     if (!ok) {
       console.error(errors.join("\n"));
       console.error(`❌ ${label}: 校验失败,${errors.length} 个错误`);

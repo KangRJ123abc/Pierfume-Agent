@@ -14,7 +14,7 @@
  * 安全:扩展以完整用户权限运行;本扩展对配方文件只读,不写不改,无网络调用。
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
@@ -32,9 +32,12 @@ export default function (pi: ExtensionAPI) {
 	pi.registerCommand("ifra-check", {
 		description: "IFRA 合规核查(按 product.category 比对限量,输出 Markdown 报告);用法:/ifra-check <file...>",
 		handler: async (args: string, ctx: ExtensionCommandContext) => {
-			const targets = args.trim().split(/\s+/).filter(Boolean);
-			if (targets.length === 0) {
-				const msg = "用法:/ifra-check <file...>(支持相对 cwd 的路径)";
+			const tokens = args.trim().split(/\s+/).filter(Boolean);
+			const outIdx = tokens.indexOf("--out");
+			const outFile = outIdx >= 0 ? tokens[outIdx + 1] : undefined;
+			const targets = tokens.filter((t, i) => t !== "--out" && tokens[i - 1] !== "--out");
+			if (targets.length === 0 || (outFile && targets.length !== 1)) {
+				const msg = "用法:/ifra-check <file...> [--out report.md](--out 仅支持单文件)";
 				if (ctx.hasUI) ctx.ui.notify(msg, "warning");
 				else console.log(msg);
 				return;
@@ -50,8 +53,15 @@ export default function (pi: ExtensionAPI) {
 							result.ok ? "info" : "error",
 						);
 					}
-					// Markdown 报告全文走 console.log(print 模式为 stderr,见 AGENTS.md §7.3)
-					console.log(renderMarkdownReport(result));
+					const markdown = renderMarkdownReport(result);
+					if (outFile) {
+						const outPath = isAbsolute(outFile) ? outFile : resolve(ctx.cwd, outFile);
+						writeFileSync(outPath, markdown, "utf8");
+						console.log(`✅ 报告已写入 ${outPath}`);
+					} else {
+						// Markdown 报告全文走 console.log(print 模式为 stderr,见 AGENTS.md §7.3)
+						console.log(markdown);
+					}
 				} catch (e) {
 					const msg = `❌ ${target}: 无法读取/核查 — ${e instanceof Error ? e.message : String(e)}`;
 					if (ctx.hasUI) ctx.ui.notify(msg, "error");

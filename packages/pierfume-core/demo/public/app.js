@@ -14,11 +14,14 @@ const famColor = (f) => FAMILY_COLOR[f] ?? "#8d7f68";
 function showTab(which) {
   $("#view-generate").classList.toggle("hidden", which !== "generate");
   $("#view-validate").classList.toggle("hidden", which !== "validate");
+  $("#view-diff").classList.toggle("hidden", which !== "diff");
   $("#tab-generate").classList.toggle("active", which === "generate");
   $("#tab-validate").classList.toggle("active", which === "validate");
+  $("#tab-diff").classList.toggle("active", which === "diff");
 }
 $("#tab-generate").addEventListener("click", () => showTab("generate"));
 $("#tab-validate").addEventListener("click", () => showTab("validate"));
+$("#tab-diff").addEventListener("click", () => showTab("diff"));
 
 // ---------------- init form ----------------
 const catSel = $("#category");
@@ -43,17 +46,68 @@ fetch("/api/materials").then((r) => r.json()).then(({ materials }) => {
   }
 }).catch(() => {});
 
-const EXAMPLES = ["formula.example.yaml", "formula.citrus-cologne.yaml", "formula.musk-amber.yaml"];
-const exBtns = $("#example-btns");
-for (const name of EXAMPLES) {
-  const b = document.createElement("button");
-  b.textContent = name.replace(/^formula\./, "").replace(/\.yaml$/, "");
-  b.addEventListener("click", async () => {
-    const r = await fetch(`/api/example?name=${encodeURIComponent(name)}`);
+const EXAMPLES = ["formula.example.yaml", "formula.citrus-cologne.yaml", "formula.musk-amber.yaml", "diff-v2.yaml"];
+function buildExampleButtons(containerId, textareaId) {
+  const box = $(`#${containerId}`);
+  for (const name of EXAMPLES) {
+    const b = document.createElement("button");
+    b.textContent = name.replace(/^formula\./, "").replace(/\.yaml$/, "");
+    b.title = name;
+    b.addEventListener("click", async () => {
+      const r = await fetch(`/api/example?name=${encodeURIComponent(name)}`);
+      const data = await r.json();
+      if (data.yaml) $(`#${textareaId}`).value = data.yaml;
+    });
+    box.appendChild(b);
+  }
+}
+buildExampleButtons("example-btns", "yaml-input");
+buildExampleButtons("example-btns-a", "yaml-a");
+buildExampleButtons("example-btns-b", "yaml-b");
+
+// 配方库:下拉载入 + 刷新
+async function refreshLibrarySelect(selectId) {
+  const sel = $(`#${selectId}`);
+  if (!sel) return;
+  const keep = sel.value;
+  try {
+    const { files } = await (await fetch("/api/library")).json();
+    sel.innerHTML = `<option value="">配方库(${files.length})…</option>` +
+      files.map((f) => `<option value="${esc(f)}">${esc(f)}</option>`).join("");
+    sel.value = keep;
+  } catch {}
+}
+for (const [selId, textareaId] of [["library-sel-validate", "yaml-input"], ["library-sel-a", "yaml-a"], ["library-sel-b", "yaml-b"]]) {
+  const sel = $(`#${selId}`);
+  if (sel) sel.addEventListener("change", async () => {
+    if (!sel.value) return;
+    const r = await fetch(`/api/library-file?name=${encodeURIComponent(sel.value)}`);
     const data = await r.json();
-    if (data.yaml) $("#yaml-input").value = data.yaml;
+    if (data.yaml) $(`#${textareaId}`).value = data.yaml;
   });
-  exBtns.appendChild(b);
+}
+refreshLibrarySelect("library-sel-validate");
+refreshLibrarySelect("library-sel-a");
+refreshLibrarySelect("library-sel-b");
+
+// 下载与入库
+function download(filename, text) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+async function saveToLibrary(yaml) {
+  const m = yaml.match(/^id:\s*([A-Za-z0-9-]+)/m) ?? yaml.match(/^\s+id:\s*([A-Za-z0-9-]+)/m);
+  const id = m ? m[1] : `formula-${Date.now()}`;
+  const r = await fetch("/api/library", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: `${id}.yaml`, yaml }),
+  });
+  const data = await r.json();
+  for (const selId of ["library-sel-validate", "library-sel-a", "library-sel-b"]) refreshLibrarySelect(selId);
+  return data.name;
 }
 
 // ---------------- rendering ----------------
@@ -169,6 +223,33 @@ function renderAll(resultsEl, { yaml, lint, ifra, logTail, piExitCode }) {
     resultsEl.insertAdjacentHTML("beforeend",
       `<details class="raw"><summary>Agent 运行日志(pi 退出码 ${piExitCode})</summary><pre class="raw-block">${esc(logTail ?? "")}</pre></details>`);
   }
+  // 操作条:入库 + 导出报告
+  const bar = document.createElement("div");
+  bar.className = "action-bar";
+  if (yaml) {
+    const save = document.createElement("button");
+    save.className = "btn ghost";
+    save.textContent = "存入配方库";
+    save.addEventListener("click", async () => {
+      save.disabled = true;
+      try {
+        const name = await saveToLibrary(yaml);
+        save.textContent = `已入库:${name}`;
+      } catch (e) {
+        save.textContent = `入库失败:${e.message}`;
+      }
+    });
+    bar.appendChild(save);
+  }
+  const md = typeof ifra?.markdown === "string" ? ifra.markdown : null;
+  if (md) {
+    const exp = document.createElement("button");
+    exp.className = "btn ghost";
+    exp.textContent = "下载合规报告(.md)";
+    exp.addEventListener("click", () => download("ifra-report.md", md));
+    bar.appendChild(exp);
+  }
+  if (bar.children.length) resultsEl.appendChild(bar);
 }
 
 // ---------------- validate tab ----------------
@@ -237,3 +318,63 @@ function finishGenerate() {
 fetch("/api/materials").then((r) => r.json()).then(({ materials }) => {
   window.__materials = Object.fromEntries(materials.map((m) => [m.id, m]));
 }).catch(() => {});
+
+// ---------------- diff tab ----------------
+function renderDiff(data) {
+  const el = $("#diff-results");
+  if (!data.ok) {
+    el.innerHTML = `<div class="card"><h2>配方对比</h2><div class="error-box">${(data.errors ?? []).map(esc).join("<br>")}</div></div>`;
+    return;
+  }
+  const c = data.compliance;
+  const badge = (v) => v.ok ? `<span class="badge ok">✅ 合规</span>` : `<span class="badge bad">❌ ${v.violationCount} 项违规</span>`;
+  let html = `<div class="card"><h2>对比:${esc(data.meta?.idA ?? "A")} → ${esc(data.meta?.idB ?? "B")}</h2>`;
+  html += `<p class="muted">变更:调 ${data.changed.length} / 增 ${data.added.length} / 删 ${data.removed.length} / 未变 ${data.unchangedCount}</p>`;
+  if (data.changed.length) {
+    html += `<table class="report"><tr><th>原料</th><th>旧%</th><th>新%</th><th>Δ</th></tr>`;
+    for (const x of data.changed) {
+      const sign = x.delta > 0 ? `+${x.delta}` : `${x.delta}`;
+      html += `<tr><td>${esc(x.materialRef)}</td><td class="num">${x.pctA}</td><td class="num">${x.pctB}</td><td class="num ${x.delta > 0 ? "delta-up" : "delta-down"}">${sign}</td></tr>`;
+    }
+    html += `</table>`;
+  }
+  if (data.added.length || data.removed.length) {
+    html += `<h3>新增 / 移除</h3><ul class="notices">`;
+    for (const a of data.added) html += `<li>+ ${esc(a.materialRef)}(${a.pct}%)</li>`;
+    for (const r of data.removed) html += `<li>− ${esc(r.materialRef)}(原 ${r.pct}%)</li>`;
+    html += `</ul>`;
+  }
+  html += `<h3>合规差异</h3><div class="verdict">${badge(c.a)}<span class="meta">Category ${esc(c.a.category)},${c.a.useLevelPct}%</span>` +
+    `<span class="arrow">→</span>${badge(c.b)}<span class="meta">Category ${esc(c.b.category)},${c.b.useLevelPct}%</span></div>`;
+  if (c.newViolationsInB.length) html += `<div class="error-box">⚠️ 新版引入违规:${c.newViolationsInB.map(esc).join(", ")}</div>`;
+  if (c.resolvedViolations.length) html += `<p class="good-note">✅ 新版消除违规:${c.resolvedViolations.map(esc).join(", ")}</p>`;
+  html += `</div>`;
+  el.innerHTML = html;
+  const bar = document.createElement("div");
+  bar.className = "action-bar";
+  const exp = document.createElement("button");
+  exp.className = "btn ghost";
+  exp.textContent = "下载对比报告(.md)";
+  exp.addEventListener("click", () => download("formula-diff.md", data.markdown ?? ""));
+  bar.appendChild(exp);
+  el.appendChild(bar);
+}
+
+$("#btn-diff").addEventListener("click", async () => {
+  const yamlA = $("#yaml-a").value;
+  const yamlB = $("#yaml-b").value;
+  if (!yamlA.trim() || !yamlB.trim()) return;
+  const btn = $("#btn-diff");
+  btn.disabled = true;
+  try {
+    const r = await fetch("/api/diff", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ yamlA, yamlB }),
+    });
+    renderDiff(await r.json());
+  } catch (e) {
+    $("#diff-results").innerHTML = `<div class="card"><div class="error-box">请求失败:${esc(e.message)}</div></div>`;
+  } finally {
+    btn.disabled = false;
+  }
+});

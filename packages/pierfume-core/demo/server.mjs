@@ -17,15 +17,18 @@
  */
 import { createServer } from "node:http";
 import { spawn, spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync, mkdirSync, openSync, readSync, closeSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, openSync, closeSync, rmSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { dirname, join, normalize, extname, resolve, isAbsolute } from "node:path";
+import { dirname, join, normalize, extname, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
+import { checkFormulaIfra, renderMarkdownReport } from "../scripts/ifra-check-core.mjs";
+import { diffFormulas, renderMarkdownDiff } from "../scripts/formula-diff-core.mjs";
 
 const DEMO_ROOT = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = join(DEMO_ROOT, "..");
 const PUBLIC_DIR = join(DEMO_ROOT, "public");
 const WORKSPACE = join(DEMO_ROOT, "workspace");
+const LIBRARY = join(WORKSPACE, "library");
 const PI_CLI = join(PKG_ROOT, "../../pi/packages/coding-agent/dist/bundle/cli.js");
 const MATERIALS_JSON = join(PKG_ROOT, "data/materials.sample.json");
 const VALIDATE_CLI = join(PKG_ROOT, "scripts/validate-formula.mjs");
@@ -34,7 +37,7 @@ const GENERATE_TIMEOUT_MS = 420_000;
 
 const PORT = Number(process.argv[2]) || Number(process.env.PIERFUME_DEMO_PORT) || 3210;
 
-mkdirSync(WORKSPACE, { recursive: true });
+mkdirSync(LIBRARY, { recursive: true });
 
 // ------------------------------------------------------------------
 // 工具:本地校验(CLI 复用,独立于 pi/模型)
@@ -53,7 +56,7 @@ function runValidators(yamlPath) {
 		ifra: {
 			code: ifraRun.status,
 			json: ifraJson,
-			markdown: ifraJson ? null : (ifraRun.stdout + ifraRun.stderr).trim(),
+			markdown: ifraJson ? renderMarkdownReport(ifraJson) : (ifraRun.stdout + ifraRun.stderr).trim(),
 		},
 	};
 }
@@ -122,7 +125,7 @@ function startGenerateJob({ brief, category, useLevelPct }) {
 const MIME = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
 
 function send(res, status, body, type = "application/json; charset=utf-8") {
-	res.writeHead(status, { "content-type": type });
+	res.writeHead(status, { "content-type": type, "cache-control": "no-store" });
 	res.end(typeof body === "string" ? body : JSON.stringify(body));
 }
 
@@ -170,9 +173,10 @@ const server = createServer(async (req, res) => {
 		}
 		if (req.method === "GET" && path === "/api/example") {
 			const name = url.searchParams.get("name") ?? "";
-			if (!/^formula\.[a-z-]+\.yaml$|^formula\.example\.yaml$/.test(name)) return send(res, 400, { error: "bad name" });
-			const file = join(PKG_ROOT, "examples", name);
-			if (!existsSync(file)) return send(res, 404, { error: "not found" });
+			if (!/^(formula\.[a-z-]+\.yaml|diff-v2\.yaml)$/.test(name)) return send(res, 400, { error: "bad name" });
+			const candidates = [join(PKG_ROOT, "examples", name), join(PKG_ROOT, "tests/fixtures", name)];
+			const file = candidates.find((c) => existsSync(c));
+			if (!file) return send(res, 404, { error: "not found" });
 			return send(res, 200, { yaml: readFileSync(file, "utf8") });
 		}
 
@@ -187,6 +191,34 @@ const server = createServer(async (req, res) => {
 			} finally {
 				rmSync(file, { force: true });
 			}
+		}
+
+		// ---- 对比(本地)----
+		if (req.method === "POST" && path === "/api/diff") {
+			const { yamlA, yamlB } = JSON.parse(await readBody(req));
+			if (typeof yamlA !== "string" || typeof yamlB !== "string") return send(res, 400, { error: "yamlA/yamlB required" });
+			const result = diffFormulas(yamlA, yamlB, { labelA: "A", labelB: "B" });
+			return send(res, 200, { ...result, markdown: renderMarkdownDiff(result, { labelA: "A", labelB: "B" }) });
+		}
+
+		// ---- 配方库(生成结果留存)----
+		if (req.method === "GET" && path === "/api/library") {
+			const names = readdirSync(LIBRARY).filter((f) => f.endsWith(".yaml")).sort();
+			return send(res, 200, { files: names });
+		}
+		if (req.method === "GET" && path === "/api/library-file") {
+			const name = url.searchParams.get("name") ?? "";
+			if (!/^[A-Za-z0-9_-]+\.yaml$/.test(name)) return send(res, 400, { error: "bad name" });
+			const file = join(LIBRARY, name);
+			if (!existsSync(file)) return send(res, 404, { error: "not found" });
+			return send(res, 200, { yaml: readFileSync(file, "utf8") });
+		}
+		if (req.method === "POST" && path === "/api/library") {
+			const { name, yaml } = JSON.parse(await readBody(req));
+			if (typeof yaml !== "string" || !yaml.trim()) return send(res, 400, { error: "yaml required" });
+			const safe = typeof name === "string" && /^[A-Za-z0-9_-]+\.yaml$/.test(name) ? name : `formula-${Date.now()}.yaml`;
+			writeFileSync(join(LIBRARY, safe), yaml, "utf8");
+			return send(res, 200, { name: safe });
 		}
 
 		// ---- 生成(brief → pi)----

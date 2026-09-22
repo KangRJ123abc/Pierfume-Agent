@@ -22,6 +22,7 @@
   <nav class="tabs" role="tablist">
     <button class="tab active" id="tab-generate" role="tab">Brief 生成配方</button>
     <button class="tab" id="tab-validate" role="tab">配方校验</button>
+    <button class="tab" id="tab-diff" role="tab">配方对比</button>
   </nav>
 </header>
 
@@ -70,7 +71,10 @@
     <div class="grid">
       <div class="card control-card">
         <h2>配方 YAML</h2>
-        <div class="example-btns" id="example-btns"></div>
+        <div class="load-row">
+          <div class="example-btns" id="example-btns"></div>
+          <select id="library-sel-validate" class="library-sel"><option value="">配方库…</option></select>
+        </div>
         <label class="field">
           <textarea id="yaml-input" rows="16" spellcheck="false" placeholder="粘贴配方 YAML,或点上方按钮载入示例"></textarea>
         </label>
@@ -79,6 +83,32 @@
       </div>
       <div class="results" id="validate-results">
         <div class="empty-hint card"><p>粘贴配方或载入示例后点击「本地校验」。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 对比页 ============ -->
+  <section id="view-diff" class="view hidden">
+    <div class="grid">
+      <div class="card control-card">
+        <h2>两版配方对比</h2>
+        <div class="load-row">
+          <span class="side-tag">旧版 A</span>
+          <div class="example-btns" id="example-btns-a"></div>
+          <select id="library-sel-a" class="library-sel"><option value="">配方库…</option></select>
+        </div>
+        <label class="field"><textarea id="yaml-a" rows="9" spellcheck="false" placeholder="旧版配方 YAML"></textarea></label>
+        <div class="load-row">
+          <span class="side-tag">新版 B</span>
+          <div class="example-btns" id="example-btns-b"></div>
+          <select id="library-sel-b" class="library-sel"><option value="">配方库…</option></select>
+        </div>
+        <label class="field"><textarea id="yaml-b" rows="9" spellcheck="false" placeholder="新版配方 YAML"></textarea></label>
+        <button id="btn-diff" class="btn primary">对比(本地,秒回)</button>
+        <p class="muted small">结构 diff(剂量调整/新增/移除)+ 两版各自 IFRA 合规判定与差异(新版引入/消除的违规)。</p>
+      </div>
+      <div class="results" id="diff-results">
+        <div class="empty-hint card"><p>填入两版配方后点击「对比」。</p></div>
       </div>
     </div>
   </section>

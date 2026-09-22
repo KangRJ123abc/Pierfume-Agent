@@ -1,0 +1,19 @@
+# 项目禁限用清单夹具:coumarin 在 bannedMaterials 中 → 应判违规
+meta:
+  id: fm-project-banned-demo
+  name: 项目夹具配方
+  version: "0.1.0"
+  status: draft
+
+product:
+  name: 测试
+  category: "4"
+  fragranceUseLevelPct: 10
+
+formula:
+  - materialRef: coumarin
+    pct: 2
+  - materialRef: citral
+    pct: 3
+  - materialRef: ethanol
+    pct: 95

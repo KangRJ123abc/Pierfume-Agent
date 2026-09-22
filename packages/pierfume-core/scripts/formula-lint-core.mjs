@@ -13,7 +13,7 @@
  * 数据/schema 按本文件所在包的相对路径运行时读取(pi install 后包布局不变)。
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { parse } from "yaml";
@@ -24,6 +24,23 @@ export const SUM_TOLERANCE = 1.0; // 总量归一容差 ±1%
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 let schemaCache = null;
 let materialsCache = null;
+
+/**
+ * 读取项目级规则文件(cwd 下的 pierfume.project.json)。
+ * 不存在或格式不对时返回空规则(不报错)——项目文件是可选增强。
+ * @returns {{bannedMaterials: string[]}}
+ */
+export function loadProjectRules(cwd = process.cwd()) {
+  try {
+    const file = join(cwd, "pierfume.project.json");
+    if (!existsSync(file)) return { bannedMaterials: [] };
+    const doc = JSON.parse(readFileSync(file, "utf8"));
+    const banned = Array.isArray(doc.bannedMaterials) ? doc.bannedMaterials.filter((x) => typeof x === "string") : [];
+    return { bannedMaterials: banned };
+  } catch {
+    return { bannedMaterials: [] };
+  }
+}
 
 function loadFormulaSchema() {
   if (schemaCache === null) {
@@ -43,10 +60,12 @@ function loadMaterials() {
  * 校验单个配方 YAML 文本。
  * @param {string} raw YAML 原文
  * @param {string} label 错误信息中的文件标签(如 "examples/formula.example.yaml")
+ * @param {{bannedMaterials?: string[]}} [project] 项目级规则(来自 cwd 下 pierfume.project.json):
+ *   bannedMaterials —— 客户禁限用清单,命中即判违规(项目红线,独立于 IFRA)
  * @returns {{ ok: boolean, errors: string[], unverifiedRefs: string[], ingredientCount: number|null }}
  *   unverifiedRefs: 引用了 humanVerified=false 原料的 id 列表(仅提示,不判错;测试断言须拒绝此类数据)
  */
-export function lintFormulaYaml(raw, label) {
+export function lintFormulaYaml(raw, label, project = {}) {
   const errors = [];
 
   let doc;
@@ -78,6 +97,16 @@ export function lintFormulaYaml(raw, label) {
       seen.add(ref);
       const m = matById.get(ref);
       if (m && !m.provenance?.humanVerified) unverifiedRefs.push(ref);
+    });
+  }
+
+  // 项目级红线:客户禁限用清单(pierfume.project.json 的 bannedMaterials)
+  if (Array.isArray(project.bannedMaterials) && Array.isArray(doc.formula)) {
+    const banned = new Set(project.bannedMaterials);
+    doc.formula.forEach((ing, i) => {
+      const ref = ing?.materialRef;
+      if (typeof ref === "string" && banned.has(ref))
+        errors.push(`${label}.formula[${i}].materialRef: 项目禁限用清单命中: "${ref}"`);
     });
   }
 

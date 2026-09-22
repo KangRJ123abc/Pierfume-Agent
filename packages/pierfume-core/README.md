@@ -8,7 +8,9 @@ Pierfume Agent 的核心 pi package:调香师副驾驶的配方工作台与工�
 | 能力 | 形态 | 说明 |
 |---|---|---|
 | `formula-lint` | pi 扩展(命令 `/formula-lint` + 工具 `formula_lint`)+ CLI | 配方 YAML 校验:schema、原料引用、重复原料、总量归一 100±1% |
-| `ifra-check` | pi 扩展(命令 `/ifra-check` + 工具 `ifra_check`)+ CLI | IFRA 合规核查:按 `product.category` 比对限量,输出 Markdown/JSON 报告(超标项、限量依据、建议调整) |
+| `ifra-check` | pi 扩展(命令 `/ifra-check` + 工具 `ifra_check`)+ CLI | IFRA 合规核查:按 `product.category` 比对限量,输出 Markdown/JSON 报告(超标项、限量依据、建议调整);支持 `--out` 导出 |
+| `formula-diff` | pi 扩展(命令 `/formula-diff` + 工具 `formula_diff`)+ CLI | 两版配方对比:剂量调整/新增/移除 + 各自合规判定差异(改版评审) |
+| 项目规则 | `pierfume.project.json`(cwd 下,可选) | 客户禁限用清单 `bannedMaterials`,formula-lint/ifra-check 命中判违规 |
 | 数据资产 | `data/` | 22 条原料(全部人工核对,CAS 经 PubChem 机器核验)+ 18 条 IFRA 规则(51st Amendment,逐条标注 STD 文档号/修订号) |
 
 设计原则:**单一事实来源** —— 限量数值只存在 `data/ifra-rules.json`,原料经 `ifraEntryRef` 引用,任何代码不硬编码合规数值。

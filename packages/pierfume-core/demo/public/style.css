@@ -149,4 +149,23 @@ pre.raw-block {
 }
 .example-btns button:hover { border-color: var(--amber); color: var(--amber-deep); }
 
+/* 操作条与第三页 */
+.action-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn.ghost {
+  background: #fff; border: 1px solid var(--amber); color: var(--amber-deep);
+  padding: 9px 20px; font-size: 14px;
+}
+.btn.ghost:hover:not(:disabled) { background: rgba(169, 116, 28, .07); }
+.load-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.load-row .example-btns { margin-bottom: 0; }
+.library-sel {
+  border: 1px solid var(--line); border-radius: 999px; background: #fff;
+  padding: 4px 10px; font-size: 12.5px; color: var(--ink-soft); max-width: 170px;
+}
+.side-tag { font-family: var(--serif); font-size: 13.5px; color: var(--ink-soft); }
+.arrow { color: var(--ink-soft); }
+.delta-up { color: var(--good); }
+.delta-down { color: var(--bad); }
+.good-note { color: var(--good); font-size: 13.5px; }
+
 .site-footer { max-width: 1180px; margin: 0 auto; padding: 0 28px 34px; color: var(--ink-soft); font-size: 12.5px; }
