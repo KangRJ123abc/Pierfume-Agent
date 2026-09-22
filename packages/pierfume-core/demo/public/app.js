@@ -11,17 +11,15 @@ const FAMILY_COLOR = {
 const famColor = (f) => FAMILY_COLOR[f] ?? "#8d7f68";
 
 // ---------------- tabs ----------------
+const VIEWS = ["chat", "generate", "validate", "diff"];
 function showTab(which) {
-  $("#view-generate").classList.toggle("hidden", which !== "generate");
-  $("#view-validate").classList.toggle("hidden", which !== "validate");
-  $("#view-diff").classList.toggle("hidden", which !== "diff");
-  $("#tab-generate").classList.toggle("active", which === "generate");
-  $("#tab-validate").classList.toggle("active", which === "validate");
-  $("#tab-diff").classList.toggle("active", which === "diff");
+  for (const v of VIEWS) {
+    $(`#view-${v}`).classList.toggle("hidden", which !== v);
+    $(`#tab-${v}`).classList.toggle("active", which === v);
+  }
 }
-$("#tab-generate").addEventListener("click", () => showTab("generate"));
-$("#tab-validate").addEventListener("click", () => showTab("validate"));
-$("#tab-diff").addEventListener("click", () => showTab("diff"));
+for (const v of VIEWS) $(`#tab-${v}`).addEventListener("click", () => showTab(v));
+showTab("chat");
 
 // ---------------- init form ----------------
 const catSel = $("#category");
@@ -100,10 +98,12 @@ function download(filename, text) {
 }
 async function saveToLibrary(yaml) {
   const m = yaml.match(/^id:\s*([A-Za-z0-9-]+)/m) ?? yaml.match(/^\s+id:\s*([A-Za-z0-9-]+)/m);
+  const v = yaml.match(/^version:\s*["']?([A-Za-z0-9.-]+)/m) ?? yaml.match(/^\s+version:\s*["']?([A-Za-z0-9.-]+)/m);
   const id = m ? m[1] : `formula-${Date.now()}`;
+  const ver = v ? v[1] : "0";
   const r = await fetch("/api/library", {
     method: "POST", headers: { "content-type": "application/json" },
-    body: JSON.stringify({ name: `${id}.yaml`, yaml }),
+    body: JSON.stringify({ name: `${id}-v${ver}.yaml`, yaml }),
   });
   const data = await r.json();
   for (const selId of ["library-sel-validate", "library-sel-a", "library-sel-b"]) refreshLibrarySelect(selId);
@@ -251,6 +251,79 @@ function renderAll(resultsEl, { yaml, lint, ifra, logTail, piExitCode }) {
   }
   if (bar.children.length) resultsEl.appendChild(bar);
 }
+
+// ---------------- validate tab 模式(单个/批量/谱系)----------------
+const MODE_PANES = { single: "pane-single", batch: "pane-batch", lineage: "pane-lineage" };
+function setMode(mode) {
+  for (const [m, pane] of Object.entries(MODE_PANES)) {
+    $(`#${pane}`).classList.toggle("hidden", m !== mode);
+    $(`#mode-${m}`).classList.toggle("active", m === mode);
+  }
+}
+$("#mode-single").addEventListener("click", () => setMode("single"));
+$("#mode-batch").addEventListener("click", () => setMode("batch"));
+$("#mode-lineage").addEventListener("click", () => setMode("lineage"));
+
+$("#btn-batch").addEventListener("click", async () => {
+  const raw = $("#yaml-batch").value;
+  const yamlDocs = raw.split(/^---\s*$/m).map((s) => s.trim()).filter(Boolean);
+  if (!yamlDocs.length) return;
+  const btn = $("#btn-batch");
+  btn.disabled = true;
+  try {
+    const r = await fetch("/api/batch", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ yamlDocs }),
+    });
+    const data = await r.json();
+    let html = `<div class="card"><h2>批量审查 · ${data.total} 个配方,${data.violated} 个不合规</h2>`;
+    html += `<table class="report"><tr><th>#</th><th>formula-lint</th><th>IFRA 判定</th><th>违规</th></tr>`;
+    for (const row of data.rows) {
+      const lintCell = row.lintOk ? `<span class="status-pill ok">✅</span>` : `<span class="status-pill bad">❌</span>`;
+      const ifraCell = row.ifraOk === null ? "—" : row.ifraOk ? `<span class="status-pill ok">合规</span>` : `<span class="status-pill bad">${row.violations} 项</span>`;
+      html += `<tr><td>${esc(row.label)}</td><td>${lintCell}</td><td>${ifraCell}</td><td class="muted">${esc(row.violationRefs.join(", ") || row.lintErrors.join("; ") || "—")}</td></tr>`;
+    }
+    html += `</table></div>`;
+    $("#validate-results").innerHTML = html;
+  } catch (e) {
+    $("#validate-results").innerHTML = `<div class="card"><div class="error-box">请求失败:${esc(e.message)}</div></div>`;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+const STATUS_COLOR = { draft: "#8d7f68", reviewed: "#3a6ea5", approved: "#3d7a4e", archived: "#999" };
+function statusPill(status) {
+  const color = STATUS_COLOR[status] ?? "#8d7f68";
+  return `<span class="status-pill" style="background:${color}">${esc(status ?? "?")}</span>`;
+}
+
+$("#btn-lineage").addEventListener("click", async () => {
+  const id = $("#lineage-id").value.trim();
+  if (!id) return;
+  const r = await fetch(`/api/lineage?id=${encodeURIComponent(id)}`);
+  const data = await r.json();
+  const el = $("#lineage-result");
+  if (!data.versions?.length) {
+    el.innerHTML = `<p class="muted small">配方库中没有 "${esc(id)}" 的版本。</p>`;
+    return;
+  }
+  let html = `<table class="report"><tr><th>版本</th><th>状态</th><th>文件</th><th></th></tr>`;
+  for (const v of data.versions) {
+    html += `<tr><td>${esc(v.version)}</td><td>${statusPill(v.status)}</td><td class="muted">${esc(v.name)}</td>` +
+      `<td><button class="btn ghost slim" data-load-lib="${esc(v.name)}">载入校验</button></td></tr>`;
+  }
+  el.innerHTML = html + `</table>`;
+  el.querySelectorAll("[data-load-lib]").forEach((b) => b.addEventListener("click", async () => {
+    const rr = await fetch(`/api/library-file?name=${encodeURIComponent(b.dataset.loadLib)}`);
+    const d = await rr.json();
+    if (d.yaml) {
+      $("#yaml-input").value = d.yaml;
+      setMode("single");
+      $("#btn-validate").click();
+    }
+  }));
+});
 
 // ---------------- validate tab ----------------
 $("#btn-validate").addEventListener("click", async () => {

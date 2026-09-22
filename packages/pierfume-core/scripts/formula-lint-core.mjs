@@ -56,6 +56,11 @@ function loadMaterials() {
   return materialsCache;
 }
 
+/** 供扩展使用:原料表(带缓存)。 */
+export function getMaterials() {
+  return loadMaterials();
+}
+
 /**
  * 校验单个配方 YAML 文本。
  * @param {string} raw YAML 原文

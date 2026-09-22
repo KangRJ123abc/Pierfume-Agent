@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-22(配方工作台闭环:formula-diff 改版对比 + 项目禁限用清单 + 报告导出;GUI 增至三页,三套测试 59 断言)。
+> 更新:2026-09-22(对话主线 P0–P2 完成:GUI 以 pi RPC 聊天为默认页,含审批桥、数据卡片、批量审查、谱系、合规余量;P3 OpenPOM 未做)。
 
 ## 1. 项目一句话
 
@@ -65,6 +65,13 @@ Pierfume_Agent/
   - 报告导出:ifra-check CLI `--out <file>`、扩展 `/ifra-check <file> --out <md>`;GUI 一键下载
   - GUI 第三页「配方对比」+ 配方库(生成结果入库,各页可载入)+ 静态资源 no-store
   - `tests/formula-diff.e2e.mjs` 三层 9 断言;三套合计 59 断言全绿
+- [x] **对话主线 P0–P2(2026-09-22)**:GUI 翻转为主对话界面 + 工作台三页;机制细节见 §7.5
+  - 聊天后端:pi `--mode rpc` 子进程/会话(JSONL 帧、SSE 推送、事件落盘 ui-events.jsonl + since 断点续传、--continue 恢复);`--tools` 白名单排除 write/edit/bash,数据写入只能走受审扩展工具;模型固定 `--model deepseek-flash`
+  - 审批桥:扩展工具内 `ctx.ui.confirm/select/input` → `extension_ui_request` → 前端弹层 → `extension_ui_response`(实测:formula_save 审批→写入→复验全流程)
+  - 新工具(formula-lint 扩展):`material_get`/`formula_get`(卡片数据)、`material_alternatives`(同香型替换建议);`formula_save`(写入审批 + 自动 lint+ifra+diff 重检 + **status=approved 硬门**);ifra-check 扩展:`ifra_headroom`(合规余量求极值)
+  - 前端对话页:流式气泡/思考折叠/工具行/数据卡片(原料卡含人工核对徽章=可信度);会话列表/新建/恢复;审批弹层
+  - P1:配方谱系(`/api/lineage`,库文件命名 `<id>-v<version>.yaml`)+ 状态徽章;P2:批量审查(校验页批量模式,`---` 分隔多配方)
+  - 已知:内嵌浏览器自动化的 element.click 对该页按钮偶发假点击(真实浏览器正常);两个经典脚本禁止重复顶层 const(app.js 与 chat.js 曾因此静默失效)
 
 ## 4. 数据现状与缺口
 
@@ -154,6 +161,15 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 - **用户级任意 cwd 可用**;local 源建议给绝对路径(相对路径会按 `~/.pi/agent` 解析,易错)
 - 包发现:`pi.extensions` 指向目录时,按子目录 package.json 的 `pi.extensions`/index.ts 递归发现(with-deps 扩展各自带 node_modules,原地加载可用)
 - 卸载:`pi uninstall <source> [-l]`;当前用户级与项目级均已装 pierfume-core
+
+### 7.5 pi RPC 模式实测备忘(2026-09-22,对话 GUI 基石)
+- 协议见 `pi/packages/coding-agent/docs/rpc.md`:stdin 发命令(`prompt`/`abort`/`set_session_name`…),stdout 流式 JSONL 事件;**帧分隔只认 `\n`,禁用 readline**(U+2028/2029 合法存在于 JSON 串内);Node 端用 StringDecoder 手工切帧
+- RPC 模式 `ctx.hasUI === true`:扩展的 `ctx.ui.confirm/select/input/editor` 变为 `extension_ui_request`(stdout,带 id)→ 客户端回 `extension_ui_response`(stdin,同 id);fire-and-forget(notify/setStatus)无需回
+- 事件:`message_update`(text_delta/thinking_delta/toolcall_*)、`tool_execution_end`(带 `result.details`,前端卡片数据源)、`agent_settled`(一轮彻底结束)、`extension_ui_request`
+- 安全姿势:聊天场景用 `--tools read,<自家工具>` 白名单排除危险内置工具;写入类工具内部自己做 `ctx.ui.confirm` 审批门 + 校验门
+- 本会话 pi 默认模型解析到 deepseek-v4-pro;spawn 时显式 `--model deepseek-flash`(AGENTS.md §7.2 策略)
+- 前端事件断点:服务端给每条事件配单调 seq 落盘,SSE 支持 `?since=seq` 补发;前端按 seq 去重;历史回放只渲染终态事件(message_end/tool_execution_end),不回放一次性 ui_request
+- 陷阱:两个经典 <script> 共享全局作用域,顶层 `const` 重名(STATUS_COLOR 等)会导致后加载脚本**整体静默失效**(无控制台报错到页面上)——已踩过,chat.js 全部加 `chat` 前缀隔离
 
 ## 8. 设计决策备忘
 

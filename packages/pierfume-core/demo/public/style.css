@@ -168,4 +168,43 @@ pre.raw-block {
 .delta-down { color: var(--bad); }
 .good-note { color: var(--good); font-size: 13.5px; }
 
+/* ---------- 对话页 ---------- */
+.chat-wrap { display: flex; flex-direction: column; height: calc(100vh - 230px); min-height: 480px; }
+.chat-toolbar { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.library-sel.wide { max-width: 260px; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px 4px; display: flex; flex-direction: column; gap: 10px; }
+.bubble { max-width: 78%; padding: 10px 16px; border-radius: 14px; font-size: 14.5px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+.bubble.user { align-self: flex-end; background: var(--gold-grad); color: #fff; border-bottom-right-radius: 4px; }
+.bubble.assistant { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.bubble.streaming { border-color: var(--amber); }
+.bubble .thinking { margin-top: 8px; font-size: 12.5px; color: var(--ink-soft); }
+.bubble .thinking pre { white-space: pre-wrap; margin: 6px 0 0; font-size: 12px; }
+.tool-row { align-self: flex-start; font-size: 12.5px; color: var(--ink-soft); background: #f3ecdd; border-radius: 8px; padding: 6px 12px; max-width: 92%; }
+.tool-row.done { color: var(--ink); }
+.chat-composer { display: flex; gap: 10px; align-items: flex-end; border-top: 1px solid var(--line); padding-top: 12px; }
+.chat-composer textarea { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-family: var(--sans); font-size: 14.5px; resize: none; }
+.chat-composer textarea:focus { outline: 2px solid rgba(169,116,28,.35); border-color: var(--amber); }
+.chat-actions { display: flex; gap: 8px; }
+.btn.slim { padding: 9px 18px; font-size: 14px; }
+
+/* 数据卡片(对话内) */
+.data-card { margin-top: 8px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 13px; }
+.data-card .card-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; font-size: 14px; }
+.data-card .ingredient { grid-template-columns: 150px 1fr 56px; }
+.status-pill.ok { background: var(--good); }
+
+/* 审批弹层 */
+.modal-overlay { position: fixed; inset: 0; background: rgba(40, 30, 15, .35); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.modal { background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 26px; max-width: 560px; width: 90%; }
+.modal h3 { font-family: var(--serif); margin: 0 0 12px; }
+.modal-msg { background: #f3ecdd; border-radius: 8px; padding: 10px 12px; font-size: 13px; white-space: pre-wrap; max-height: 300px; overflow: auto; }
+.modal-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.modal-input { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; font-family: var(--sans); font-size: 14px; }
+
+/* 模式切换小按钮 */
+.mode-btn { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 14px; font-size: 12.5px; cursor: pointer; color: var(--ink-soft); }
+.mode-btn.active { border-color: var(--amber); color: var(--amber-deep); font-weight: 600; }
+#lineage-result { margin-top: 10px; }
+#lineage-result .report { font-size: 13px; }
+
 .site-footer { max-width: 1180px; margin: 0 auto; padding: 0 28px 34px; color: var(--ink-soft); font-size: 12.5px; }

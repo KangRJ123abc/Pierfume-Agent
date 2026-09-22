@@ -216,6 +216,64 @@ export function checkFormulaIfra(raw, label) {
 	};
 }
 
+/**
+ * 合规余量(求极值):对配方中每个原料,计算"在不突破任何限量、且总量不超 100 的前提下,
+ * 浓缩物中最多还能再加多少个百分点"。
+ * - quantitative:maxAdd = (limitPct - finishedPct) × 100 / useLevel(可为负 = 已超标)
+ * - prohibition:0(已违规)
+ * - specification / 无 IFRA 条目:null(无法据此判定)
+ * @returns {{ ok: boolean, errors: string[], useLevelPct: number, sumPct: number,
+ *   maxAddBySum: number, rows: Array<{materialRef, kind, currentPct, limitPct, maxAddPct}> }}
+ */
+export function computeHeadroom(raw, label) {
+	const lint = lintFormulaYaml(raw, label);
+	const empty = { rows: [] };
+	if (!lint.ok) {
+		return { ok: false, errors: lint.errors, useLevelPct: null, sumPct: null, maxAddBySum: null, ...empty };
+	}
+	const doc = parse(raw);
+	const materials = loadMaterials();
+	const rules = loadIfraRules();
+	const matById = new Map(materials.map((m) => [m.id, m]));
+	const entryById = new Map(rules.entries.map((e) => [e.id, e]));
+	const useLevel = typeof doc.product.fragranceUseLevelPct === "number" ? doc.product.fragranceUseLevelPct : 100;
+	const category = String(doc.product.category);
+	const sumPct = doc.formula.reduce((s, i) => s + i.pct, 0);
+
+	const rows = [];
+	for (const ing of doc.formula) {
+		const material = matById.get(ing.materialRef);
+		const entryRef = material?.ifraEntryRef;
+		const entry = entryRef ? entryById.get(entryRef) : null;
+		const finishedPct = (ing.pct * useLevel) / 100;
+		if (!entry || entry.restrictionType === "specification") {
+			rows.push({ materialRef: ing.materialRef, kind: entry ? "specification" : "no-entry", currentPct: ing.pct, limitPct: null, maxAddPct: null });
+			continue;
+		}
+		if (entry.restrictionType === "prohibition") {
+			rows.push({ materialRef: ing.materialRef, kind: "prohibition", currentPct: ing.pct, limitPct: 0, maxAddPct: 0 });
+			continue;
+		}
+		const limit = (entry.limits ?? []).find((l) => l.category === category);
+		if (!limit || limit.limitPct === null || limit.limitPct === undefined || limit.condition === "Prohibited" || limit.limitPct === 0) {
+			const maxAdd = limit && (limit.condition === "Prohibited" || limit.limitPct === 0) ? 0 : null;
+			rows.push({ materialRef: ing.materialRef, kind: maxAdd === 0 ? "prohibited" : "no-limit", currentPct: ing.pct, limitPct: maxAdd === 0 ? 0 : null, maxAddPct: maxAdd });
+			continue;
+		}
+		const maxAddPct = Math.round(((limit.limitPct - finishedPct) * 100) / useLevel * 1e4) / 1e4;
+		rows.push({ materialRef: ing.materialRef, kind: "quantitative", currentPct: ing.pct, limitPct: limit.limitPct, maxAddPct });
+	}
+
+	return {
+		ok: true,
+		errors: [],
+		useLevelPct: useLevel,
+		sumPct: Math.round(sumPct * 1e4) / 1e4,
+		maxAddBySum: Math.round((100 - sumPct) * 1e4) / 1e4,
+		rows,
+	};
+}
+
 function fmtPct(n) {
 	if (n === null || n === undefined) return "—";
 	const r = Math.round(n * 1e4) / 1e4;

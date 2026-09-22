@@ -17,27 +17,35 @@
  */
 import { createServer } from "node:http";
 import { spawn, spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync, mkdirSync, openSync, closeSync, rmSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, openSync, closeSync, rmSync, readdirSync, appendFileSync } from "node:fs";
+import { StringDecoder } from "node:string_decoder";
 import { fileURLToPath } from "node:url";
 import { dirname, join, normalize, extname, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
-import { checkFormulaIfra, renderMarkdownReport } from "../scripts/ifra-check-core.mjs";
+import { checkFormulaIfra, renderMarkdownReport, computeHeadroom } from "../scripts/ifra-check-core.mjs";
 import { diffFormulas, renderMarkdownDiff } from "../scripts/formula-diff-core.mjs";
+import { lintFormulaYaml } from "../scripts/formula-lint-core.mjs";
+import { parse as parseYaml } from "yaml";
 
 const DEMO_ROOT = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = join(DEMO_ROOT, "..");
 const PUBLIC_DIR = join(DEMO_ROOT, "public");
 const WORKSPACE = join(DEMO_ROOT, "workspace");
 const LIBRARY = join(WORKSPACE, "library");
+const CHATS_DIR = join(WORKSPACE, "chats");
 const PI_CLI = join(PKG_ROOT, "../../pi/packages/coding-agent/dist/bundle/cli.js");
 const MATERIALS_JSON = join(PKG_ROOT, "data/materials.sample.json");
 const VALIDATE_CLI = join(PKG_ROOT, "scripts/validate-formula.mjs");
 const IFRA_CLI = join(PKG_ROOT, "scripts/ifra-check.mjs");
 const GENERATE_TIMEOUT_MS = 420_000;
+// 聊天会话的工具白名单:危险内置工具(write/edit/bash)一律排除,
+// 数据写入只能走受审的 formula_save(内部有 ctx.ui.confirm 审批门)
+const CHAT_TOOLS = "read,material_get,formula_get,material_alternatives,formula_save,formula_lint,ifra_check,ifra_headroom,formula_diff";
 
 const PORT = Number(process.argv[2]) || Number(process.env.PIERFUME_DEMO_PORT) || 3210;
 
 mkdirSync(LIBRARY, { recursive: true });
+mkdirSync(CHATS_DIR, { recursive: true });
 
 // ------------------------------------------------------------------
 // 工具:本地校验(CLI 复用,独立于 pi/模型)
@@ -117,6 +125,100 @@ function startGenerateJob({ brief, category, useLevelPct }) {
 		job.result = { yaml, piExitCode: code, ...runValidators(formulaPath), logTail: logTail(logPath) };
 	});
 	return id;
+}
+
+// ------------------------------------------------------------------
+// 聊天子系统:pi --mode rpc 子进程 + SSE 推送 + 审批桥(extension_ui 协议)
+//   - 每个会话一个 pi RPC 进程,cwd=workspace/chats/<id>/(会话文件与配方写入都在此)
+//   - 事件持久化到 ui-events.jsonl(seq 递增),SSE 支持 since=seq 断点续传
+//   - 审批:扩展工具内 ctx.ui.confirm/select/input → extension_ui_request →
+//     前端弹层 → POST /api/chat/respond → extension_ui_response
+// ------------------------------------------------------------------
+const chats = new Map(); // id → chat
+
+function chatLog(chat, rec) {
+	chat.seq++;
+	const full = { seq: chat.seq, ...rec };
+	appendFileSync(chat.eventFile, JSON.stringify(full) + "\n");
+	return full;
+}
+
+function broadcast(chat, rec) {
+	const payload = `data: ${JSON.stringify(rec)}\n\n`;
+	for (const res of chat.sse) {
+		try {
+			res.write(payload);
+		} catch {
+			chat.sse.delete(res);
+		}
+	}
+}
+
+function attachJsonlReader(stream, onLine) {
+	const decoder = new StringDecoder("utf8");
+	let buffer = "";
+	stream.on("data", (chunk) => {
+		buffer += typeof chunk === "string" ? chunk : decoder.write(chunk);
+		while (true) {
+			const i = buffer.indexOf("\n");
+			if (i === -1) break;
+			let line = buffer.slice(0, i);
+			buffer = buffer.slice(i + 1);
+			if (line.endsWith("\r")) line = line.slice(0, -1);
+			if (line.trim()) onLine(line);
+		}
+	});
+	stream.on("end", () => {
+		buffer += decoder.end();
+		if (buffer.trim()) onLine(buffer);
+	});
+}
+
+function spawnChat(id, { resume }) {
+	const dir = join(CHATS_DIR, id);
+	mkdirSync(dir, { recursive: true });
+	const args = [
+		PI_CLI, "--mode", "rpc", "--offline",
+		"--model", "deepseek-flash",
+		"--session-dir", dir,
+		"--tools", CHAT_TOOLS,
+		"-e", join(PKG_ROOT, "extensions/formula-lint"),
+		"-e", join(PKG_ROOT, "extensions/ifra-check"),
+	];
+	if (resume) args.push("--continue");
+	const proc = spawn(process.execPath, args, { cwd: dir, stdio: ["pipe", "pipe", "pipe"] });
+	const chat = {
+		id, dir, proc,
+		createdAt: Date.now(), name: "",
+		seq: 0, eventFile: join(dir, "ui-events.jsonl"),
+		sse: new Set(), busy: false, dead: false,
+	};
+	proc.on("exit", (code) => {
+		chat.dead = true;
+		broadcast(chat, { type: "chat_dead", code });
+	});
+	proc.stderr.on("data", () => {});
+	attachJsonlReader(proc.stdout, (line) => {
+		let event;
+		try {
+			event = JSON.parse(line);
+		} catch {
+			return;
+		}
+		if (event.type === "agent_settled") chat.busy = false;
+		if (event.type === "agent_start") chat.busy = true;
+		broadcast(chat, chatLog(chat, { type: "event", event }));
+	});
+	chats.set(id, chat);
+	return chat;
+}
+
+function chatCmd(chat, cmd) {
+	try {
+		chat.proc.stdin.write(JSON.stringify(cmd) + "\n");
+	} catch {
+		/* 进程已退出 */
+	}
 }
 
 // ------------------------------------------------------------------
@@ -238,6 +340,112 @@ const server = createServer(async (req, res) => {
 			const job = jobs.get(id);
 			if (!job) return send(res, 404, { error: "no such job" });
 			return send(res, 200, job);
+		}
+
+		// ---- 批量审查(本地)----
+		if (req.method === "POST" && path === "/api/batch") {
+			const { yamlDocs } = JSON.parse(await readBody(req));
+			if (!Array.isArray(yamlDocs) || yamlDocs.length === 0) return send(res, 400, { error: "yamlDocs required" });
+			const rows = yamlDocs.slice(0, 50).map((yaml, i) => {
+				const label = `doc-${i + 1}`;
+				const lint = lintFormulaYaml(yaml, label);
+				if (!lint.ok) return { label, lintOk: false, lintErrors: lint.errors, ifraOk: null, violations: 0, violationRefs: [] };
+				const ifra = checkFormulaIfra(yaml, label);
+				return {
+					label, lintOk: true, lintErrors: [],
+					ifraOk: ifra.ok, violations: ifra.violations.length,
+					violationRefs: ifra.violations.map((v) => v.materialRef),
+				};
+			});
+			return send(res, 200, { rows, total: rows.length, violated: rows.filter((r) => r.ifraOk === false).length });
+		}
+
+		// ---- 谱系(配方多版本)----
+		if (req.method === "GET" && path === "/api/lineage") {
+			const id = url.searchParams.get("id") ?? "";
+			if (!/^[A-Za-z0-9-]+$/.test(id)) return send(res, 400, { error: "bad id" });
+			const files = readdirSync(LIBRARY).filter((f) => f === `${id}.yaml` || f.startsWith(`${id}-v`)).sort();
+			const versions = files.map((name) => {
+				let meta = null;
+				try {
+					meta = parseYaml(readFileSync(join(LIBRARY, name), "utf8"))?.meta ?? null;
+				} catch {}
+				return { name, version: meta?.version ?? "?", status: meta?.status ?? "?", createdAt: meta?.createdAt ?? null };
+			});
+			return send(res, 200, { id, versions });
+		}
+
+		// ---- 聊天(pi RPC 桥)----
+		if (req.method === "GET" && path === "/api/chat/list") {
+			const list = [...chats.values()].map((c) => ({ id: c.id, name: c.name, createdAt: c.createdAt, dead: c.dead }));
+			for (const d of readdirSync(CHATS_DIR)) {
+				if (!chats.has(d)) list.push({ id: d, name: "", createdAt: 0, dead: true, offline: true });
+			}
+			return send(res, 200, { sessions: list.sort((a, b) => b.createdAt - a.createdAt) });
+		}
+		if (req.method === "POST" && path === "/api/chat/new") {
+			const id = randomUUID().slice(0, 8);
+			spawnChat(id, { resume: false });
+			return send(res, 200, { id });
+		}
+		if (req.method === "POST" && path === "/api/chat/resume") {
+			const { id } = JSON.parse(await readBody(req));
+			if (typeof id !== "string" || !/^[A-Za-z0-9-]+$/.test(id) || !existsSync(join(CHATS_DIR, id))) {
+				return send(res, 404, { error: "no such chat" });
+			}
+			const chat = chats.get(id) ?? spawnChat(id, { resume: true });
+			return send(res, 200, { id, dead: chat.dead });
+		}
+		if (req.method === "GET" && path === "/api/chat/history") {
+			const id = url.searchParams.get("id") ?? "";
+			const file = join(CHATS_DIR, id, "ui-events.jsonl");
+			if (!existsSync(file)) return send(res, 200, { events: [] });
+			const events = readFileSync(file, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
+			return send(res, 200, { events });
+		}
+		if (req.method === "GET" && path === "/api/chat/events") {
+			const id = url.searchParams.get("id") ?? "";
+			const chat = chats.get(id);
+			if (!chat) return send(res, 404, { error: "no live chat(先 resume)" });
+			res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" });
+			res.write(": connected\n\n");
+			chat.sse.add(res);
+			const since = Number(url.searchParams.get("since") ?? 0);
+			if (since > 0 && existsSync(chat.eventFile)) {
+				for (const line of readFileSync(chat.eventFile, "utf8").split("\n")) {
+					if (!line.trim()) continue;
+					const rec = JSON.parse(line);
+					if (rec.seq > since) res.write(`data: ${JSON.stringify(rec)}\n\n`);
+				}
+			}
+			req.on("close", () => chat.sse.delete(res));
+			return;
+		}
+		if (req.method === "POST" && path === "/api/chat/message") {
+			const { id, text } = JSON.parse(await readBody(req));
+			const chat = chats.get(id);
+			if (!chat || chat.dead) return send(res, 410, { error: "chat not live(先 resume)" });
+			if (chat.busy) return send(res, 409, { error: "agent busy" });
+			if (!chat.name) {
+				chat.name = String(text).slice(0, 24);
+				chatCmd(chat, { type: "set_session_name", name: chat.name });
+			}
+			chatCmd(chat, { type: "prompt", message: String(text) });
+			chat.busy = true;
+			return send(res, 200, { ok: true });
+		}
+		if (req.method === "POST" && path === "/api/chat/respond") {
+			const { id, reqId, ...payload } = JSON.parse(await readBody(req));
+			const chat = chats.get(id);
+			if (!chat || chat.dead) return send(res, 410, { error: "chat not live" });
+			chatCmd(chat, { type: "extension_ui_response", id: reqId, ...payload });
+			return send(res, 200, { ok: true });
+		}
+		if (req.method === "POST" && path === "/api/chat/abort") {
+			const { id } = JSON.parse(await readBody(req));
+			const chat = chats.get(id);
+			if (chat && !chat.dead) chatCmd(chat, { type: "abort" });
+			return send(res, 200, { ok: true });
 		}
 
 		send(res, 404, { error: "not found" });

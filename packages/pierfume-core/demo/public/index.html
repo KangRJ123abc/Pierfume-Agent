@@ -20,13 +20,36 @@
     </div>
   </div>
   <nav class="tabs" role="tablist">
-    <button class="tab active" id="tab-generate" role="tab">Brief 生成配方</button>
+    <button class="tab active" id="tab-chat" role="tab">对话</button>
+    <button class="tab" id="tab-generate" role="tab">Brief 生成配方</button>
     <button class="tab" id="tab-validate" role="tab">配方校验</button>
     <button class="tab" id="tab-diff" role="tab">配方对比</button>
   </nav>
 </header>
 
 <main>
+  <!-- ============ 对话页(主界面)============ -->
+  <section id="view-chat" class="view">
+    <div class="chat-wrap card">
+      <div class="chat-toolbar">
+        <select id="chat-sessions" class="library-sel wide"><option value="">会话…</option></select>
+        <button id="btn-chat-new" class="btn ghost">新建会话</button>
+        <span id="chat-status" class="muted small"></span>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <div class="empty-hint"><p>随便聊聊,或让我查原料、看配方、算合规余量、改配方(改动会先给你审批)。</p>
+        <p class="muted">可用提示:「查一下 geraniol」「评估 D:/…/formula.yaml 的合规余量」「把刚才的配方存成新版」。</p></div>
+      </div>
+      <div class="chat-composer">
+        <textarea id="chat-input" rows="2" placeholder="输入消息,Enter 发送,Shift+Enter 换行"></textarea>
+        <div class="chat-actions">
+          <button id="btn-chat-send" class="btn primary slim">发送</button>
+          <button id="btn-chat-stop" class="btn ghost slim hidden">停止</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ 生成页 ============ -->
   <section id="view-generate" class="view">
     <div class="grid">
@@ -75,11 +98,33 @@
           <div class="example-btns" id="example-btns"></div>
           <select id="library-sel-validate" class="library-sel"><option value="">配方库…</option></select>
         </div>
-        <label class="field">
-          <textarea id="yaml-input" rows="16" spellcheck="false" placeholder="粘贴配方 YAML,或点上方按钮载入示例"></textarea>
-        </label>
-        <button id="btn-validate" class="btn primary">本地校验(秒回)</button>
-        <p class="muted small">纯本地执行:formula-lint(结构/引用/总量)+ ifra-check(IFRA 合规),不调用模型。</p>
+        <div class="load-row">
+          <button class="mode-btn active" id="mode-single" type="button">单个</button>
+          <button class="mode-btn" id="mode-batch" type="button">批量审查</button>
+          <button class="mode-btn" id="mode-lineage" type="button">谱系</button>
+        </div>
+        <div id="pane-single">
+          <label class="field">
+            <textarea id="yaml-input" rows="16" spellcheck="false" placeholder="粘贴配方 YAML,或点上方按钮载入示例"></textarea>
+          </label>
+          <button id="btn-validate" class="btn primary">本地校验(秒回)</button>
+          <p class="muted small">纯本地执行:formula-lint(结构/引用/总量)+ ifra-check(IFRA 合规),不调用模型。</p>
+        </div>
+        <div id="pane-batch" class="hidden">
+          <label class="field">
+            <textarea id="yaml-batch" rows="14" spellcheck="false" placeholder="多个配方 YAML,用 --- 分隔(最多 50 个)"></textarea>
+          </label>
+          <button id="btn-batch" class="btn primary">批量合规审查(秒回)</button>
+          <p class="muted small">QA 场景:一次核查多个配方,输出合规判定汇总表。</p>
+        </div>
+        <div id="pane-lineage" class="hidden">
+          <label class="field">
+            <span>配方 id(如 fm-citrus-cologne)</span>
+            <input id="lineage-id" type="text" placeholder="fm-…">
+          </label>
+          <button id="btn-lineage" class="btn primary">查谱系</button>
+          <div id="lineage-result"></div>
+        </div>
       </div>
       <div class="results" id="validate-results">
         <div class="empty-hint card"><p>粘贴配方或载入示例后点击「本地校验」。</p></div>
@@ -119,5 +164,6 @@
 </footer>
 
 <script src="/static/app.js"></script>
+<script src="/static/chat.js"></script>
 </body>
 </html>

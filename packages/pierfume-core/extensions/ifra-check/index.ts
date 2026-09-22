@@ -18,7 +18,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
-import { checkFormulaIfra, renderMarkdownReport } from "../../scripts/ifra-check-core.mjs";
+import { checkFormulaIfra, renderMarkdownReport, computeHeadroom } from "../../scripts/ifra-check-core.mjs";
 
 function runCheck(target: string, cwd: string) {
 	const path = isAbsolute(target) ? target : resolve(cwd, target);
@@ -104,6 +104,45 @@ export default function (pi: ExtensionAPI) {
 			return {
 				content: [{ type: "text" as const, text }],
 				details: { ...result, reportMarkdown: renderMarkdownReport(result) },
+			};
+		},
+	});
+
+	// ------------------------------------------------------------------
+	// 工具:ifra_headroom — 合规余量(每个原料还能再加多少)
+	// ------------------------------------------------------------------
+	pi.registerTool({
+		name: "ifra_headroom",
+		label: "IFRA Headroom",
+		description: "计算配方中各原料的合规余量:在不突破限量与总量 100 的前提下,浓缩物中最多还能增加多少个百分点。调整配方剂量前使用。",
+		parameters: Type.Object({ path: Type.String({ description: "配方 YAML 路径" }) }),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			let raw;
+			try {
+				raw = readTarget(params.path, ctx.cwd);
+			} catch (e) {
+				throw new Error(`无法读取配方文件: ${e instanceof Error ? e.message : String(e)}`);
+			}
+			const result = computeHeadroom(raw, params.path);
+			if (!result.ok) {
+				return {
+					content: [{ type: "text" as const, text: `❌ ${result.errors.join("\n")}` }],
+					details: { kind: "headroom", ok: false, errors: result.errors },
+				};
+			}
+			const capped = result.rows.map((r) =>
+				r.maxAddPct === null ? r : { ...r, maxAddPct: Math.min(r.maxAddPct, result.maxAddBySum) },
+			);
+			const text =
+				`余量(同时受总量 100 限制,当前合计 ${result.sumPct}%):` +
+				capped
+					.filter((r) => r.kind === "quantitative")
+					.map((r) => `${r.materialRef} 还可 +${r.maxAddPct}`)
+					.join("; ") +
+				` · 总量余量 ${result.maxAddBySum}`;
+			return {
+				content: [{ type: "text" as const, text }],
+				details: { kind: "headroom", ...result, rows: capped },
 			};
 		},
 	});
