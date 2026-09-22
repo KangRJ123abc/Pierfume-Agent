@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-22(D3 ifra-check 完成、三层测试 26 断言全绿;合规断言待人工确认后提交,见 §3/§9)。
+> 更新:2026-09-22(D3 已提交 4857dff、合规断言已确认;双套件 50 断言全绿。下一步 D5 打包验证)。
 
 ## 1. 项目一句话
 
@@ -43,7 +43,7 @@ Pierfume_Agent/
   - 3 好配方(example/citrus-cologne/musk-amber)+ 5 坏夹具(tests/fixtures/,各注入一类错误)
   - `tests/formula-lint.e2e.mjs`:A 单元/B CLI/C pi E2E 三层;`npm run test:formula-lint`
   - E2E 实测结论见 §7.3(网络已通,扩展真实分发成功)
-- [~] **ifra-check 扩展(D3)**:代码完成、三层测试 26 断言全绿,**合规断言待人工确认后提交(红线 5)**。已完成:
+- [x] **ifra-check 扩展(D3,提交 4857dff;合规断言经人工确认 2026-09-22,红线 5)**:三层测试 26 断言全绿。已实现:
   - `scripts/ifra-check-core.mjs`:共享核查核心 —— formula-lint 前置 → 成品口径换算(pct × fragranceUseLevelPct/100)→ quantitative/prohibition/specification 三型判定;不硬编码任何限量(单一事实来源 data/ifra-rules.json)
   - `scripts/ifra-check.mjs`:CLI(Markdown 默认,`--json` 输出 JSON,退出码 0/1)
   - `extensions/ifra-check/`:命令 `/ifra-check`(Markdown 报告:超标项/限量依据/建议调整)+ 工具 `ifra_check`(摘要 + JSON details)
@@ -143,7 +143,7 @@ MSYS_NO_PATHCONV=1 node ../../pi/packages/coding-agent/dist/bundle/cli.js --offl
 
 1. [x] ~~定义**配方 YAML Schema**~~(D1,提交 87952e0)
 2. [x] ~~**formula-lint 扩展**~~(D2,提交 7c2c62e;网络验证 + 三层测试 24 断言全绿,见 §7.3)
-3. [~] **ifra-check 扩展(D3)** —— 代码完成、测试全绿,**待人工确认合规断言后提交**(红线 5;断言表见 tests/ifra-check.e2e.mjs 用例注释)
+3. [x] ~~**ifra-check 扩展(D3)**~~(提交 4857dff;合规断言 2026-09-22 经人工确认,红线 5)
 4. 打包验证 `pi install` + 端到端 demo—— D5(MVP 验收 §3.2:10 个测试配方含超标样本全部判对 —— 当前 8 配方,补齐 10 个留 D6–D7 回归)
 5. [x] ~~git init~~(首个提交 aa88e64)
 6. 测试断言需基于人工核对后的数据,编写时向用户确认
