@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-23(GitHub 私有仓库已建并推送 KangRJ123abc/Pierfume-Agent;对话页两 bug 已修;远程 = 本地 46e48ab)。
+> 更新:2026-09-23(dedc27c:数据管理 P0–P3 — cid 必填契约、material_add/update 审批写盘工具链、配方库/香调轮盘/热图前端;GitHub 私有仓库已建并推送 KangRJ123abc/Pierfume-Agent)。
 
 ## 1. 项目一句话
 
@@ -15,19 +15,22 @@ Pierfume_Agent/
 ├── packages/pierfume-core/   # 主 pi package(本项目的开发主场)
 │   ├── extensions/
 │   │   ├── formula-lint/    # 已实现(D2,提交 7c2c62e;with-deps:package.json + index.ts;node_modules 不入 git)
-│   │   └── ifra-check/      # 已实现(D3,待提交;命令 /ifra-check + 工具 ifra_check,Markdown/JSON 双输出)
+│   │   ├── ifra-check/      # 已实现(D3,提交 4857dff;命令 /ifra-check + 工具 ifra_check/ifra_headroom)
+│   │   └── data-admin/      # 已实现(2026-09-23,dedc27c;工具 material_add/material_update/formula_heatmap)
 │   ├── skills/  prompts/                        # 占位
 │   ├── schemas/{materials,ifra-rules,formula}.schema.json
 │   ├── data/{materials.sample.json, ifra-rules.json, _cas-draft.json}
-│   ├── examples/   # 3 个好配方:formula.example / citrus-cologne / musk-amber .yaml(均 IFRA 合规)
+│   ├── examples/   # 3 个好配方:formula.example / citrus-cologne / musk-amber .yaml(musk-amber 带 accord+pyramid 新字段)
 │   ├── tests/fixtures/  # lint 坏夹具 5 个 + ifra 夹具 5 个(3 违规/1 边界合规/1 specification 提示)
-│   ├── scripts/{schema-validator, formula-lint-core, validate-data, validate-formula, ifra-check-core, ifra-check, fetch-cas, build-materials}.mjs
+│   ├── scripts/{schema-validator, cas-check, formula-lint-core, formula-diff-core, ifra-check-core, formula-heatmap-core, material-admin-core, validate-data, validate-formula, ifra-check, formula-diff, material-admin, fetch-cas, build-materials}.mjs
+│   ├── demo/{server.mjs, public/{index.html, app.js, chat.js, pages.js, style.css}, workspace/}   # GUI 运行数据(gitignored)
+│   └── docs/{data-verification-checklist, data-verification-report-2026-09-21}.md
 │   └── docs/{data-verification-checklist, data-verification-report-2026-09-21}.md
 ├── docs/Pierfume-Agent-项目初始文档.md
 └── AGENTS.md                 # 本文件
 ```
 
-## 3. 当前进度(2026-09-22)
+## 3. 当前进度(2026-09-23)
 
 - [x] **底座环境**:pi 克隆 + 构建成功 + CLI 可用(`node packages/coding-agent/dist/bundle/cli.js --version` → 0.85.1)
 - [x] **数据 Schema**:materials + ifra-rules 双 JSON Schema
@@ -74,6 +77,11 @@ Pierfume_Agent/
   - 已知:内嵌浏览器自动化的 element.click 对该页按钮偶发假点击(真实浏览器正常);两个经典脚本禁止重复顶层 const(app.js 与 chat.js 曾因此静默失效)
   - **2026-09-22 晚修复两 bug**(提交 64b549c):①agent_start/settled 分支误写 `chat$.querySelector`(chat$ 是函数)→ 每轮对话收尾必抛 TypeError;②服务器重启后 /events 404 → EventSource 僵尸重连占满连接数 → 状态卡死「连接中断」。修复:/events 与 /message 遇目录即自动 --continue 恢复 + SSE 20s 心跳;前端连续 3 次失败主动停止重连;发送 410 自动 resume 重试一次。实测重启场景自动恢复 ✓
   - 真实使用观察(2026-09-23):用户已用对话页完成铃兰(muguet)原料调研——Agent 正确拒答无条目原料的限量并引红线 3;**数据缺口确认**:库内缺现代铃兰主料(Florhydral/Bourgeonal/Florol 等),linalool/limonene 的 specification 参数仍待补(入库走 PubChem 核验 + 人工确认)
+- [x] **数据管理 P0–P3(2026-09-23,提交 dedc27c;测试 74 断言全绿)**:
+  - **P0 cid 必填契约**:materials schema 新增 `cid`(正整数 | 字面量 "用户自有";迷你校验器利用"数字关键字只查数字、string 关键字只查字符串"实现),cas 放宽(整数 CID 必须配机器核验 CAS);22 条存量 CID 从已人工核对的 provenance 机械提升
+  - **P1 data-admin 扩展**(`extensions/data-admin/`):`material_add`(PubChem CID/化合物名批量解析→校验→`ctx.ui.confirm` 审批→写盘→失败回滚)、`material_update`(旧→新差异审批,humanVerified 重置 false + 追加来源)、`formula_heatmap`(配方×原料 pct 矩阵);共享核心 `material-admin-core.mjs`(纯函数/IO 分离)+ CLI(`scripts/material-admin.mjs preview/add/update`,`--data` 临时副本演练,真实库需 `--yes`)
+  - **P2/P3 前端**:`meta.accord`(12 香调)+ `pyramid`(前中后调)入 formula schema,lint 增金字塔规则(引用须存在且须在组成中);server 端点 `/api/material(s)`、`/api/library`(recipes[])、`/api/formula`、`POST /api/formula`(fm-NNNN 自动编号,lint 硬门,失败不占号);前端 `pages.js`:配方库/详情(原料资料卡模态)/新建表单(金字塔 chip 自动补配比行)/SVG 香调轮盘 12 宫格;chat.js 渲染 heatmap 与 material-save 卡片;聊天白名单加三工具并挂载 data-admin 扩展
+  - **自测与未验证**:离线两层 33 断言全绿 + 3211 端口 curl 全端点通过(建配方/详情/404/400 lint 拦截/穿越防护/序号递增且失败不占号);3210 已重启为新代码。**浏览器端运行时未自动化验证**(热图/轮盘/资料卡弹层需真实浏览器过目);写盘工具的 RPC 审批链路沿用 formula_save 已验证机制,尚未在对话中实测 material_add 端到端
 
 ## 4. 数据现状与缺口
 
@@ -114,10 +122,13 @@ npm run diff-formula -- old.yaml new.yaml                 # 两版配方对比(�
 cd pi && node packages/coding-agent/dist/bundle/cli.js --help
 
 # 配方/扩展测试(三层:单元/CLI/pi E2E;E2E 需 DEEPSEEK_API_KEY)
-npm test                                                  # formula-lint + ifra-check 全量(50 断言)
-npm run test:formula-lint
-npm run test:ifra-check
-PIERFUME_SKIP_PI_E2E=1 npm run test:formula-lint     # 只跑离线两层
+npm test                                                  # 四套全量(74 断言)
+npm run test:formula-lint / test:ifra-check / test:formula-diff / test:material-admin
+PIERFUME_SKIP_PI_E2E=1 npm test                       # 只跑离线两层
+
+# 数据管理 CLI(dedc27c;preview 走 PubChem,add/update 用 --data 临时副本演练,真实库需 --yes)
+node scripts/material-admin.mjs preview --cid 6549 --family floral --note top
+node scripts/material-admin.mjs add --data /tmp/copy.json --json '<draft>'
 
 # demo GUI(零新依赖;另开终端)
 npm run demo                                          # → http://127.0.0.1:3210
@@ -171,7 +182,8 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 - 安全姿势:聊天场景用 `--tools read,<自家工具>` 白名单排除危险内置工具;写入类工具内部自己做 `ctx.ui.confirm` 审批门 + 校验门
 - 本会话 pi 默认模型解析到 deepseek-v4-pro;spawn 时显式 `--model deepseek-flash`(AGENTS.md §7.2 策略)
 - 前端事件断点:服务端给每条事件配单调 seq 落盘,SSE 支持 `?since=seq` 补发;前端按 seq 去重;历史回放只渲染终态事件(message_end/tool_execution_end),不回放一次性 ui_request
-- 陷阱:两个经典 <script> 共享全局作用域,顶层 `const` 重名(STATUS_COLOR 等)会导致后加载脚本**整体静默失效**(无控制台报错到页面上)——已踩过,chat.js 全部加 `chat` 前缀隔离
+- 陷阱:两个经典 <script> 共享全局作用域,顶层 `const` 重名(STATUS_COLOR 等)会导致后加载脚本**整体静默失效**(无控制台报错到页面上)——已踩过,chat.js 全部加 `chat` 前缀隔离;pages.js 统一 `lib`/`wheel` 前缀
+- 2026-09-23(dedc27c):CHAT_TOOLS 白名单增 `material_add,material_update,formula_heatmap`,spawnChat 增挂 `-e extensions/data-admin`(扩展不挂载则白名单条目无效);写盘工具审批沿用 `extension_ui_request/response` 桥,material-save/heatmap 卡片走 `tool_execution_end` 的 `result.details`
 
 ### 7.6 GitHub 私有仓库推送链路(2026-09-23 建立)
 - 远端:`origin = https://github.com/KangRJ123abc/Pierfume-Agent.git`(**private**);首次推送 46e48ab,`master` 已跟踪
@@ -187,6 +199,14 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 - CAS 主号取 PubChem 同义词首条 + 校验位过滤;异构体/别名进 `synonyms`
 - amyl-cinnamal 主 CAS 为 **122-40-7**(母体),101365-33-7 为 (2Z) 异构体
 
+**数据管理(2026-09-23,dedc27c)**:
+- **cid 必填契约**:正整数(PubChem CID)或字面量 "用户自有";迷你校验器用 `type:["integer","string"]` + 分类型关键字(integer 走 exclusiveMinimum、string 走 pattern)实现,无需 oneOf/const
+- **机器解析唯一事实源**:material_add 的名称/CAS/分子量全部 PUG REST 现场抓取(CAS 经校验位过滤);Agent/用户只补分类字段(family/note/odor,非事实字段),审批弹层确认的是完整草稿
+- **写盘审批链**:预校验(schema+冲突)→ `ctx.ui.confirm` → 写盘 → 全表复验 → 失败回滚;material_update 把 humanVerified 重置 false 并追加来源行(内存对象改键要真 `delete`,校验发生在序列化前)
+- **配方手动入口**:`POST /api/formula` 只认库内原料(lint 硬门),fm-NNNN 自动编号取库内最大号+1,失败不占号;Agent 路径(formula_save)与用户路径(GUI 表单)同走 lint/ifra 双检
+- **香调轮盘 SVG 自绘**:不热链香水时代图片(版权 + CDN 不稳);12 宫格 accord 枚举与香水时代分类对齐,leather≈leathery,chypre/fougere/aromatic 无对应 family 词表
+- **配方金字塔一致性**:pyramid 引用须在原料库且须出现在 formula 组成中(lint 硬规则),故 GUI 选金字塔原料自动补配比行
+
 **Pi 扩展机制调研结论(2026-09-21,本地源码 + pi.dev 双源核对一致)**:
 - 扩展 = **默认导出工厂函数** `(pi: ExtensionAPI) => void|Promise<void>`,**无 `defineExtension()`**;jiti 直接加载 TS 免编译,扩展永不打进 bundle
 - 注册:`pi.registerCommand(name,{description,handler:(args,ctx)=>...})`、`pi.registerTool({name,parameters:TypeBox,execute})`;改文件用 `withFileMutationQueue`;拦截调用用 `pi.on("tool_call",...)` 返回 `{block,reason}`
@@ -197,7 +217,7 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 
 ## 9. 待办与下一步
 
-**已完成(2026-09-21 → 09-23,远程 master = 46e48ab):**
+**已完成(2026-09-21 → 09-23,远程 master 待同步 dedc27c):**
 1. [x] ~~定义**配方 YAML Schema**~~(D1,87952e0)
 2. [x] ~~**formula-lint 扩展**~~(D2,7c2c62e;三层测试全绿,§7.3)
 3. [x] ~~**ifra-check 扩展(D3)**~~(4857dff;合规断言经人工确认,红线 5)
@@ -206,10 +226,12 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 6. [x] ~~demo GUI(atelier 风格)~~(2a57783)
 7. [x] ~~配方工作台闭环:diff/禁限用清单/导出~~(52b1a87)
 8. [x] ~~对话主线 P0–P2(RPC 聊天/审批桥/卡片/批量/谱系/余量)~~(ebfe997 + 修复 64b549c)
+9. [x] ~~**数据管理 P0–P3**(cid 契约/material_add+update 审批写盘/配方库前端/香调轮盘/热图)~~(dedc27c,§3、§8)
 
 **下一步(按优先级):**
-1. **数据扩充**(用户暂停中,重启时从这里开始):现代铃兰原料(Florhydral/Bourgeonal/Florol 等,先 PubChem 机器核验再人工确认)、linalool/limonene 的 specification 参数、原料 22→50+、IFRA 规则 18→80+
-2. **MVP 验收 #4**:测试配方 8→10 个并全量回归(D6–D7 范畴)
-3. P3(可选):OpenPOM 气味预测工具(SMILES→描述符,本地推理)+ 预测条形图卡片
-4. 提示词/经验沉淀为 skills(§7 场景 4:知识沉淀)
-5. 合规相关测试断言持续遵守红线 5(人工确认后合入)
+1. **数据扩充**(用户暂停中,重启时从这里开始;现可走 material_add 批量机器解析 + 人工确认):现代铃兰原料(Florhydral/Bourgeonal/Florol 等)、linalool/limonene 的 specification 参数、原料 22→50+、IFRA 规则 18→80+
+2. 真实浏览器过目新前端(配方库/轮盘/资料卡/热图卡片) + 对话中实测一次 material_add 端到端(RPC 审批→写盘→复验)
+3. **MVP 验收 #4**:测试配方 8→10 个并全量回归(D6–D7 范畴)
+4. P3(可选):OpenPOM 气味预测工具(SMILES→描述符,本地推理)+ 预测条形图卡片
+5. 提示词/经验沉淀为 skills(§7 场景 4:知识沉淀)
+6. 合规相关测试断言持续遵守红线 5(人工确认后合入)
