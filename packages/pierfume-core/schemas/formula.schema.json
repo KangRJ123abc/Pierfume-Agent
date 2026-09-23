@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pierfume.local/schemas/formula.schema.json",
   "title": "Pierfume formula (YAML)",
-  "description": "配方 YAML 的结构定义。YAML 是 JSON 超集,校验时先解析为 JSON 再按本 Schema 校验。meta 记录版本/状态;product 定义产品类别(决定 ifra-check 适用哪一列限量)与香精添加量;formula 为香精浓缩物组成,materialRef 引用 data/materials.sample.json 的原料 id(单一事实来源)。注意:category 是字符串,必须加引号(YAML 中 4 是数字,'4' 才是字符串);formula 各 pct 之和应≈100(formula-lint 校验,容差 ±1)。",
+  "description": "配方 YAML 的结构定义。YAML 是 JSON 超集,校验时先解析为 JSON 再按本 Schema 校验。meta 记录版本/状态;product 定义产品类别(决定 ifra-check 适用哪一列限量)与香精添加量;formula 为香精浓缩物组成,materialRef 引用 data/materials.sample.json 的原料 id(单一事实来源)。meta.accord 为香水时代风格的香调家族(12 类,可选);pyramid 为前/中/后调金字塔(可选,原料须存在于原料库且出现在 formula 组成中,由 formula-lint 校验)。注意:category 是字符串,必须加引号(YAML 中 4 是数字,'4' 才是字符串);formula 各 pct 之和应≈100(formula-lint 校验,容差 ±1)。",
   "type": "object",
   "additionalProperties": false,
   "required": ["meta", "product", "formula"],
@@ -25,6 +25,24 @@
           "type": "string",
           "enum": ["draft", "reviewed", "approved", "archived"],
           "description": "draft=草稿;reviewed=已复核;approved=已批准(仅通过工具链校验后才可标记)"
+        },
+        "accord": {
+          "type": "string",
+          "enum": [
+            "floral",
+            "oriental",
+            "woody",
+            "leather",
+            "chypre",
+            "fougere",
+            "aromatic",
+            "green",
+            "aquatic",
+            "citrus",
+            "gourmand",
+            "fruity"
+          ],
+          "description": "香调家族(香水时代 12 宫格分类,可选):花香/东方/木质/皮革/西普/馥奇/芳香/绿叶/水生/柑橘/美食/果香"
         },
         "notes": { "type": "string" }
       }
@@ -72,6 +90,31 @@
         }
       },
       "description": "香精浓缩物组成,剂量合计应≈100(容差 ±1,formula-lint 校验);同一 materialRef 不得重复出现"
+    },
+    "pyramid": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "top": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "uniqueItems": true,
+          "description": "前调(头香)原料 id 列表"
+        },
+        "heart": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "uniqueItems": true,
+          "description": "中调(体香)原料 id 列表"
+        },
+        "base": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "uniqueItems": true,
+          "description": "后调(基香)原料 id 列表"
+        }
+      },
+      "description": "香调金字塔(可选):前/中/后调原料 id。formula-lint 校验:引用须存在于原料库,且须同时出现在 formula 组成中"
     }
   }
 }

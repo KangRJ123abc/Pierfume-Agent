@@ -22,6 +22,9 @@
   <nav class="tabs" role="tablist">
     <button class="tab active" id="tab-chat" role="tab">对话</button>
     <button class="tab" id="tab-generate" role="tab">Brief 生成配方</button>
+    <button class="tab" id="tab-library" role="tab">配方库</button>
+    <button class="tab" id="tab-create" role="tab">新建配方</button>
+    <button class="tab" id="tab-wheel" role="tab">香调轮盘</button>
     <button class="tab" id="tab-validate" role="tab">配方校验</button>
     <button class="tab" id="tab-diff" role="tab">配方对比</button>
   </nav>
@@ -87,6 +90,71 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- ============ 配方库页(列表)============ -->
+  <section id="view-library" class="view hidden">
+    <div class="card">
+      <div class="lib-head">
+        <h2>配方库</h2>
+        <button id="lib-btn-new" class="btn ghost slim">＋ 新建配方</button>
+      </div>
+      <div id="lib-list"><p class="muted">加载中…</p></div>
+      <h3>内置示例(只读)</h3>
+      <p class="muted small">examples/ 下的示例配方,仅供查看,不入配方库。</p>
+      <div id="lib-examples" class="example-btns"></div>
+    </div>
+  </section>
+
+  <!-- ============ 新建配方页(手动入口,lint 硬门在服务端)============ -->
+  <section id="view-create" class="view hidden">
+    <div class="card create-card">
+      <h2>新建配方</h2>
+      <label class="field">
+        <span>配方名称(必填)</span>
+        <input id="create-name" type="text" placeholder="例:晨雾白茶古龙水">
+      </label>
+      <label class="field">
+        <span>香调(香水时代 12 宫格,可选)</span>
+        <select id="create-accord"><option value="">(未指定)</option></select>
+      </label>
+      <div class="field">
+        <span>香调金字塔(从原料库多选;选中会自动加入下方配比表)</span>
+        <div class="tier-row"><b>前调</b><div><div id="create-chips-top" class="tier-chips"></div><select id="create-add-top" class="lib-inline-sel"></select></div></div>
+        <div class="tier-row"><b>中调</b><div><div id="create-chips-heart" class="tier-chips"></div><select id="create-add-heart" class="lib-inline-sel"></select></div></div>
+        <div class="tier-row"><b>后调</b><div><div id="create-chips-base" class="tier-chips"></div><select id="create-add-base" class="lib-inline-sel"></select></div></div>
+      </div>
+      <div class="field">
+        <span>原料配比(只列原料库已有原料;合计须 100±1)</span>
+        <div id="create-rows"></div>
+        <button id="create-add-row" class="btn ghost slim" type="button">＋ 添加原料行</button>
+        <div id="create-sum" class="create-sum">合计 0%(目标 100±1)</div>
+      </div>
+      <div class="field-row">
+        <label class="field"><span>IFRA 类别(默认 4)</span><input id="create-category" type="text" value="4"></label>
+        <label class="field"><span>香精添加量 %(可选)</span><input id="create-uselevel" type="number" min="0.5" max="100" step="0.5" placeholder="留空 = 100"></label>
+      </div>
+      <button id="create-submit" class="btn primary">创建配方(lint 校验)</button>
+      <div id="create-errors"></div>
+    </div>
+  </section>
+
+  <!-- ============ 香调轮盘页(12 宫格 SVG)============ -->
+  <section id="view-wheel" class="view hidden">
+    <div class="wheel-wrap">
+      <div class="card wheel-card">
+        <h2>香调轮盘</h2>
+        <div id="wheel-svg"></div>
+      </div>
+      <div class="card" id="wheel-results">
+        <p class="muted">点击轮盘上的香调,查看该香调的配方与原料。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 配方详情页(?view=formula&file=…)============ -->
+  <section id="view-formula" class="view hidden">
+    <div id="lib-detail"></div>
   </section>
 
   <!-- ============ 校验页 ============ -->
@@ -165,5 +233,6 @@
 
 <script src="/static/app.js"></script>
 <script src="/static/chat.js"></script>
+<script src="/static/pages.js"></script>
 </body>
 </html>

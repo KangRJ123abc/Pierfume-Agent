@@ -25,7 +25,7 @@ import { randomUUID } from "node:crypto";
 import { checkFormulaIfra, renderMarkdownReport, computeHeadroom } from "../scripts/ifra-check-core.mjs";
 import { diffFormulas, renderMarkdownDiff } from "../scripts/formula-diff-core.mjs";
 import { lintFormulaYaml } from "../scripts/formula-lint-core.mjs";
-import { parse as parseYaml } from "yaml";
+import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
 const DEMO_ROOT = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = join(DEMO_ROOT, "..");
@@ -40,7 +40,7 @@ const IFRA_CLI = join(PKG_ROOT, "scripts/ifra-check.mjs");
 const GENERATE_TIMEOUT_MS = 420_000;
 // 聊天会话的工具白名单:危险内置工具(write/edit/bash)一律排除,
 // 数据写入只能走受审的 formula_save(内部有 ctx.ui.confirm 审批门)
-const CHAT_TOOLS = "read,material_get,formula_get,material_alternatives,formula_save,formula_lint,ifra_check,ifra_headroom,formula_diff";
+const CHAT_TOOLS = "read,material_get,formula_get,material_alternatives,formula_save,formula_lint,ifra_check,ifra_headroom,formula_diff,material_add,material_update,formula_heatmap";
 
 const PORT = Number(process.argv[2]) || Number(process.env.PIERFUME_DEMO_PORT) || 3210;
 
@@ -67,6 +67,23 @@ function runValidators(yamlPath) {
 			markdown: ifraJson ? renderMarkdownReport(ifraJson) : (ifraRun.stdout + ifraRun.stderr).trim(),
 		},
 	};
+}
+
+// ------------------------------------------------------------------
+// 原料映射(列表/详情共用;cid/cas 可缺,统一给 null)
+// ------------------------------------------------------------------
+function mapMaterial(m) {
+	return {
+		id: m.id, name: m.name, cid: m.cid ?? null, cas: m.cas ?? null,
+		family: m.family ?? [], note: m.note ?? null, odor: m.odor ?? null,
+		ifraEntryRef: m.ifraEntryRef ?? null,
+		humanVerified: Boolean(m.provenance?.humanVerified),
+		ifra: Boolean(m.ifraEntryRef), // 兼容旧前端(调色板 chip 的 * 标记)
+	};
+}
+
+function loadMaterialsFile() {
+	return JSON.parse(readFileSync(MATERIALS_JSON, "utf8"));
 }
 
 // ------------------------------------------------------------------
@@ -184,6 +201,7 @@ function spawnChat(id, { resume }) {
 		"--tools", CHAT_TOOLS,
 		"-e", join(PKG_ROOT, "extensions/formula-lint"),
 		"-e", join(PKG_ROOT, "extensions/ifra-check"),
+		"-e", join(PKG_ROOT, "extensions/data-admin"),
 	];
 	if (resume) args.push("--continue");
 	const proc = spawn(process.execPath, args, { cwd: dir, stdio: ["pipe", "pipe", "pipe"] });
@@ -267,11 +285,14 @@ const server = createServer(async (req, res) => {
 
 		// ---- 原料/示例(只读白名单)----
 		if (req.method === "GET" && path === "/api/materials") {
-			const materials = JSON.parse(readFileSync(MATERIALS_JSON, "utf8")).map((m) => ({
-				id: m.id, name: m.name, cas: m.cas, family: m.family, note: m.note, odor: m.odor,
-				ifra: Boolean(m.ifraEntryRef),
-			}));
-			return send(res, 200, { materials });
+			return send(res, 200, { materials: loadMaterialsFile().map(mapMaterial) });
+		}
+		if (req.method === "GET" && path === "/api/material") {
+			const id = url.searchParams.get("id") ?? "";
+			if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) return send(res, 400, { error: "bad id" });
+			const m = loadMaterialsFile().find((x) => x.id === id);
+			if (!m) return send(res, 404, { error: "not found" });
+			return send(res, 200, { material: mapMaterial(m) });
 		}
 		if (req.method === "GET" && path === "/api/example") {
 			const name = url.searchParams.get("name") ?? "";
@@ -305,8 +326,102 @@ const server = createServer(async (req, res) => {
 
 		// ---- 配方库(生成结果留存)----
 		if (req.method === "GET" && path === "/api/library") {
-			const names = readdirSync(LIBRARY).filter((f) => f.endsWith(".yaml")).sort();
-			return send(res, 200, { files: names });
+			const names = existsSync(LIBRARY) ? readdirSync(LIBRARY).filter((f) => f.endsWith(".yaml")).sort() : [];
+			const recipes = names.map((file) => {
+				const base = {
+					file,
+					meta: { id: null, name: file, version: "?", status: "?", accord: null },
+					pyramid: null, ingredientCount: 0, lintOk: false,
+				};
+				try {
+					const raw = readFileSync(join(LIBRARY, file), "utf8");
+					const doc = parseYaml(raw);
+					const lint = lintFormulaYaml(raw, file);
+					return {
+						file,
+						meta: {
+							id: doc?.meta?.id ?? null, name: doc?.meta?.name ?? file,
+							version: doc?.meta?.version ?? "?", status: doc?.meta?.status ?? "?",
+							accord: doc?.meta?.accord ?? null,
+						},
+						pyramid: doc?.pyramid ?? null,
+						ingredientCount: Array.isArray(doc?.formula) ? doc.formula.length : 0,
+						lintOk: lint.ok,
+					};
+				} catch (e) {
+					return { ...base, error: e instanceof Error ? e.message : String(e) };
+				}
+			});
+			return send(res, 200, { files: names, recipes });
+		}
+		// 配方详情:meta/product/pyramid + 原料表(解析名称/CID/香型)+ lint 结果;file 限定在库目录内
+		if (req.method === "GET" && path === "/api/formula") {
+			const name = url.searchParams.get("file") ?? "";
+			if (!/^[A-Za-z0-9_-]+\.yaml$/.test(name)) return send(res, 400, { error: "bad file" });
+			const file = join(LIBRARY, name);
+			if (!file.startsWith(LIBRARY) || !existsSync(file)) return send(res, 404, { error: "not found" });
+			const raw = readFileSync(file, "utf8");
+			const doc = parseYaml(raw) ?? {};
+			const matById = new Map(loadMaterialsFile().map((m) => [m.id, m]));
+			const ingredients = (Array.isArray(doc.formula) ? doc.formula : []).map((ing) => {
+				const m = matById.get(ing?.materialRef);
+				return {
+					materialRef: ing?.materialRef ?? "?", pct: ing?.pct ?? null,
+					name: m?.name ?? null, cid: m?.cid ?? null,
+					family: m?.family ?? [], note: m?.note ?? null, odor: m?.odor ?? null,
+				};
+			});
+			const lint = lintFormulaYaml(raw, name);
+			return send(res, 200, {
+				file: name, meta: doc.meta ?? {}, product: doc.product ?? {},
+				pyramid: doc.pyramid ?? null, ingredients,
+				lint: { ok: lint.ok, errors: lint.errors },
+			});
+		}
+		// 新建配方(手动入口,无需审批弹层,但 lint 是硬门):id 取库内 fm-NNNN 最大号 +1
+		if (req.method === "POST" && path === "/api/formula") {
+			const body = JSON.parse(await readBody(req));
+			const name = String(body.name ?? "").trim();
+			if (!name) return send(res, 400, { error: "name required" });
+			const ACCORDS = ["floral", "oriental", "woody", "leather", "chypre", "fougere", "aromatic", "green", "aquatic", "citrus", "gourmand", "fruity"];
+			const accord = body.accord ?? null;
+			if (accord !== null && !ACCORDS.includes(accord)) return send(res, 400, { error: "bad accord" });
+			const ingredients = Array.isArray(body.ingredients) ? body.ingredients : [];
+			if (!ingredients.length) return send(res, 400, { error: "ingredients required" });
+			const category = body.category ? String(body.category) : "4";
+			if (!/^\d{1,2}[A-D]?$/.test(category)) return send(res, 400, { error: "bad category" });
+			const useLevel = body.fragranceUseLevelPct === undefined || body.fragranceUseLevelPct === null || body.fragranceUseLevelPct === ""
+				? null : Number(body.fragranceUseLevelPct);
+			if (useLevel !== null && !(useLevel > 0 && useLevel <= 100)) return send(res, 400, { error: "bad fragranceUseLevelPct" });
+			const pyramid = {};
+			for (const tier of ["top", "heart", "base"]) {
+				const arr = Array.isArray(body[tier]) ? body[tier].filter((x) => typeof x === "string" && x) : [];
+				if (arr.length) pyramid[tier] = arr;
+			}
+			const existing = existsSync(LIBRARY) ? readdirSync(LIBRARY).filter((f) => f.endsWith(".yaml")) : [];
+			let maxSeq = 0;
+			for (const f of existing) {
+				const mm = f.match(/^fm-(\d{4})-v/);
+				if (mm) maxSeq = Math.max(maxSeq, Number(mm[1]));
+			}
+			let seq = maxSeq + 1, id;
+			do {
+				id = `fm-${String(seq).padStart(4, "0")}`;
+				seq++;
+			} while (existing.some((f) => f === `${id}.yaml` || f.startsWith(`${id}-v`)));
+			const doc = {
+				meta: { id, name, version: "1.0.0", status: "draft", createdAt: new Date().toISOString().slice(0, 10) },
+				product: { category, ...(useLevel !== null ? { fragranceUseLevelPct: useLevel } : {}) },
+				...(Object.keys(pyramid).length ? { pyramid } : {}),
+				formula: ingredients.map((i) => ({ materialRef: String(i.materialRef), pct: Number(i.pct) })),
+			};
+			if (accord) doc.meta.accord = accord;
+			const yamlText = stringifyYaml(doc);
+			const lint = lintFormulaYaml(yamlText, `${id}-v1.yaml`);
+			if (!lint.ok) return send(res, 400, { errors: lint.errors });
+			const file = `${id}-v1.yaml`;
+			writeFileSync(join(LIBRARY, file), yamlText, "utf8");
+			return send(res, 200, { file, id, lint: { ok: lint.ok, errors: lint.errors } });
 		}
 		if (req.method === "GET" && path === "/api/library-file") {
 			const name = url.searchParams.get("name") ?? "";

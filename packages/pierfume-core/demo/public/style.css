@@ -208,3 +208,68 @@ pre.raw-block {
 #lineage-result .report { font-size: 13px; }
 
 .site-footer { max-width: 1180px; margin: 0 auto; padding: 0 28px 34px; color: var(--ink-soft); font-size: 12.5px; }
+
+/* ---------- 配方库 / 详情 / 新建 / 香调轮盘(P2+P3) ---------- */
+.lib-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 4px; }
+.lib-head h2 { margin: 0; }
+.lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 12px; }
+.lib-card { border: 1px solid var(--line); border-radius: 12px; padding: 13px 16px; background: #fff; cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease; }
+.lib-card:hover { border-color: var(--amber); box-shadow: var(--shadow); }
+.lib-card:focus-visible { outline: 2px solid rgba(169, 116, 28, .4); }
+.lib-card-title { font-family: var(--serif); font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lib-card-title .muted { margin-left: auto; }
+.lib-tier { font-size: 12.5px; color: var(--ink-soft); margin-top: 4px; }
+.lib-tier b { color: var(--ink); font-weight: 600; margin-right: 2px; }
+.accord-pill { display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: 12px; background: rgba(169, 116, 28, .13); color: var(--amber-deep); font-family: var(--sans); font-weight: 400; }
+.pyramid-tiers { display: flex; flex-direction: column; gap: 6px; }
+.mat-link { color: var(--amber-deep); cursor: pointer; text-decoration: underline dotted; }
+[data-lib-mat] { cursor: pointer; }
+.kv { display: grid; grid-template-columns: 76px 1fr; gap: 7px 12px; font-size: 13.5px; margin: 0; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; }
+
+/* 新建配方表单 */
+.create-card { max-width: 720px; }
+.tier-row { display: grid; grid-template-columns: 48px 1fr; gap: 10px; align-items: start; margin-bottom: 10px; }
+.tier-row > b { font-size: 13.5px; padding-top: 7px; }
+.tier-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; min-height: 4px; }
+.lib-inline-sel { width: 100%; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font-family: var(--sans); font-size: 13.5px; }
+.chip .chip-x { border: none; background: none; cursor: pointer; color: var(--ink-soft); font-size: 13px; padding: 0 0 0 3px; line-height: 1; }
+.chip .chip-x:hover { color: var(--bad); }
+.ing-edit-row { display: grid; grid-template-columns: 1fr 110px 42px; gap: 8px; margin-bottom: 8px; }
+.ing-edit-row select, .ing-edit-row input { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font-family: var(--sans); font-size: 13.5px; }
+.ing-edit-row .btn { padding: 6px 0; }
+.create-sum { margin-top: 8px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.sum-ok { color: var(--good); }
+.sum-bad { color: var(--bad); }
+
+/* 香调轮盘 */
+.wheel-wrap { display: grid; grid-template-columns: 470px 1fr; gap: 22px; align-items: start; }
+@media (max-width: 960px) { .wheel-wrap { grid-template-columns: 1fr; } }
+.wheel-card { position: sticky; top: 16px; }
+.wheel-svg-el { width: 100%; max-width: 430px; display: block; margin: 0 auto; }
+.wheel-spoke { stroke: var(--line); stroke-width: 1; }
+.wheel-center circle { fill: var(--bg-soft); stroke: var(--amber); stroke-width: 1.5; }
+.wheel-center text { fill: var(--amber-deep); font-family: var(--serif); font-size: 18px; text-anchor: middle; }
+.wheel-node { cursor: pointer; }
+.wheel-node circle { fill: #fff; stroke: var(--line); stroke-width: 1.5; transition: fill .15s ease, stroke .15s ease; }
+.wheel-node:hover circle { stroke: var(--amber); }
+.wheel-node.sel circle { fill: var(--amber); stroke: var(--amber-deep); }
+.wheel-node text { fill: var(--ink); font-size: 14.5px; text-anchor: middle; pointer-events: none; }
+.wheel-node .wheel-node-sub { font-size: 9.5px; fill: var(--ink-soft); }
+.wheel-node.sel text { fill: #fff; }
+.wheel-node.sel .wheel-node-sub { fill: rgba(255, 255, 255, .85); }
+
+/* 热图卡片(对话内,纯 SVG) */
+.heatmap-card svg { max-width: 100%; height: auto; display: block; margin-top: 6px; }
+.heatmap-card .hm-cell { stroke: #fff; stroke-width: 1; }
+.heatmap-card .hm-head { fill: var(--ink-soft); font-size: 10.5px; }
+.heatmap-card .hm-rowlabel { fill: var(--ink); font-size: 12px; }
+.heatmap-card .hm-val { fill: #fff; font-size: 10.5px; text-anchor: middle; }
+.heatmap-card .hm-val.dim { fill: var(--ink-soft); }
+
+/* material-save 卡片(material_add / material_update) */
+.mat-save-card.save-ok { border-left: 4px solid var(--good); }
+.mat-save-card.save-cancel { border-left: 4px solid var(--ink-soft); }
+.mat-save-card.save-bad { border-left: 4px solid var(--bad); }
+.mat-save-card table.report { font-size: 12.5px; margin-top: 4px; }

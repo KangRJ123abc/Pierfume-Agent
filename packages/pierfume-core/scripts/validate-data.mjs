@@ -4,8 +4,10 @@
  *
  * 校验内容:
  *   1. data/materials.sample.json 与 data/ifra-rules.json 符合各自 JSON Schema
- *   2. 所有 CAS 号通过校验位算法(格式 + 最后一位校验)
+ *      (materials 的 cid 必填:正整数或字面量 "用户自有")
+ *   2. 所有 CAS 号通过校验位算法(格式 + 最后一位校验;caa 省略时不校验)
  *   3. materials.ifraEntryRef 必须能在 ifra-rules.json entries 中找到(跨文件引用完整性)
+ *   4. cid 为整数(PubChem 来源)时 cas 必填 —— 机器添加的原料必须带机器核验的 CAS
  *
  * 用法:
  *   npm run validate-data            # 校验数据文件
@@ -19,6 +21,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { validateValue } from "./schema-validator.mjs";
+import { casCheckDigitValid } from "./cas-check.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const errors = [];
@@ -28,18 +31,7 @@ function err(path, msg) {
 }
 
 // ---------------------------------------------------------------------------
-// CAS 号校验位
-// ---------------------------------------------------------------------------
-// 算法:取去掉校验位的数字(从右往左),依次乘以 1,2,3,... 求和,校验位 = 和 mod 10。
-// 例:5989-27-5 → 基数字符串 "598927",从右到左 7*1+2*2+9*3+8*4+9*5+5*6=145,145%10=5 ✓
-export function casCheckDigitValid(cas) {
-  const m = /^(\d{2,7})-(\d{2})-(\d)$/.exec(cas);
-  if (!m) return false;
-  const base = (m[1] + m[2]).split("").reverse().join("");
-  let sum = 0;
-  for (let i = 0; i < base.length; i++) sum += (i + 1) * Number(base[i]);
-  return sum % 10 === Number(m[3]);
-}
+// CAS 号校验位(实现在 ./cas-check.mjs,与 material-admin-core 共用)
 
 // 迷你 JSON Schema 校验器见 ./schema-validator.mjs(两脚本共用)
 
@@ -82,6 +74,15 @@ function selftest() {
   check("uniqueItems 拦截", hit({ uniqueItems: true }, [1, 1]));
   check("minItems 拦截", hit({ minItems: 1 }, []));
 
+  // cid 契约:正整数或字面量 "用户自有"(type 联合 + 分类型关键字)
+  const cidSchema = { type: ["integer", "string"], exclusiveMinimum: 0, pattern: "^用户自有$" };
+  check("cid 正整数放行", !hit(cidSchema, 6549));
+  check("cid 字面量 用户自有 放行", !hit(cidSchema, "用户自有"));
+  check("cid 为 0 被拦截", hit(cidSchema, 0));
+  check("cid 负整数被拦截", hit(cidSchema, -1));
+  check("cid 其他字符串被拦截", hit(cidSchema, "unknown"));
+  check("cid 为 null 被拦截", hit(cidSchema, null));
+
   if (fail.length) {
     console.error(fail.join("\n"));
     process.exit(1);
@@ -99,9 +100,14 @@ function main() {
   const materials = validateJson("data/materials.sample.json", "schemas/materials.schema.json");
   const ifra = validateJson("data/ifra-rules.json", "schemas/ifra-rules.schema.json");
 
-  // CAS 校验位
+  // CAS 校验位(省略不校验;cid 为整数时则必填)
   materials.forEach((m, i) => {
-    if (!casCheckDigitValid(m.cas)) err(`materials.sample.json[${i}].cas`, `CAS 校验位不通过: "${m.cas}"`);
+    if (m.cas === undefined) {
+      if (Number.isInteger(m.cid))
+        err(`materials.sample.json[${i}].cas`, `cid 为 PubChem 整数(${m.cid})时 cas 必填(须机器核验)`);
+    } else if (!casCheckDigitValid(m.cas)) {
+      err(`materials.sample.json[${i}].cas`, `CAS 校验位不通过: "${m.cas}"`);
+    }
   });
   ifra.entries.forEach((e, i) => {
     e.cas.forEach((c) => {

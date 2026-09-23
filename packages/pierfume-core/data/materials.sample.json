@@ -2,6 +2,7 @@
   {
     "id": "alpha-isomethyl-ionone",
     "name": "Alpha-Isomethyl Ionone",
+    "cid": 5372174,
     "cas": "127-51-5",
     "family": [
       "floral",
@@ -24,6 +25,7 @@
   {
     "id": "amyl-cinnamal",
     "name": "Amyl Cinnamal",
+    "cid": 31209,
     "cas": "122-40-7",
     "family": [
       "floral"
@@ -48,6 +50,7 @@
   {
     "id": "benzyl-benzoate",
     "name": "Benzyl Benzoate",
+    "cid": 2345,
     "cas": "120-51-4",
     "family": [
       "balsamic"
@@ -69,6 +72,7 @@
   {
     "id": "benzyl-salicylate",
     "name": "Benzyl Salicylate",
+    "cid": 8363,
     "cas": "118-58-1",
     "family": [
       "balsamic"
@@ -90,6 +94,7 @@
   {
     "id": "cinnamal",
     "name": "Cinnamal (Cinnamaldehyde)",
+    "cid": 637511,
     "cas": "104-55-2",
     "family": [
       "spicy"
@@ -111,6 +116,7 @@
   {
     "id": "citral",
     "name": "Citral",
+    "cid": 638011,
     "cas": "5392-40-5",
     "family": [
       "citrus"
@@ -132,6 +138,7 @@
   {
     "id": "citronellol",
     "name": "Citronellol",
+    "cid": 8842,
     "cas": "106-22-9",
     "family": [
       "floral"
@@ -153,6 +160,7 @@
   {
     "id": "coumarin",
     "name": "Coumarin",
+    "cid": 323,
     "cas": "91-64-5",
     "family": [
       "gourmand",
@@ -175,6 +183,7 @@
   {
     "id": "ethanol",
     "name": "Ethanol",
+    "cid": 702,
     "cas": "64-17-5",
     "family": [
       "carrier"
@@ -196,6 +205,7 @@
   {
     "id": "eugenol",
     "name": "Eugenol",
+    "cid": 3314,
     "cas": "97-53-0",
     "family": [
       "spicy"
@@ -217,6 +227,7 @@
   {
     "id": "geraniol",
     "name": "Geraniol",
+    "cid": 637566,
     "cas": "106-24-1",
     "family": [
       "floral"
@@ -238,6 +249,7 @@
   {
     "id": "hedione",
     "name": "Hedione (Methyl Dihydrojasmonate)",
+    "cid": 102861,
     "cas": "24851-98-7",
     "family": [
       "floral"
@@ -259,6 +271,7 @@
   {
     "id": "hydroxycitronellal",
     "name": "Hydroxycitronellal",
+    "cid": 7888,
     "cas": "107-75-5",
     "family": [
       "floral"
@@ -280,6 +293,7 @@
   {
     "id": "isoeugenol",
     "name": "Isoeugenol",
+    "cid": 853433,
     "cas": "97-54-1",
     "family": [
       "spicy"
@@ -301,6 +315,7 @@
   {
     "id": "lilial",
     "name": "Lilial (BMHCA)",
+    "cid": 228987,
     "cas": "80-54-6",
     "family": [
       "floral"
@@ -322,6 +337,7 @@
   {
     "id": "limonene",
     "name": "d-Limonene",
+    "cid": 440917,
     "cas": "5989-27-5",
     "family": [
       "citrus"
@@ -343,6 +359,7 @@
   {
     "id": "linalool",
     "name": "Linalool",
+    "cid": 6549,
     "cas": "78-70-6",
     "family": [
       "floral",
@@ -365,6 +382,7 @@
   {
     "id": "lyral",
     "name": "Lyral (HMMC)",
+    "cid": 91604,
     "cas": "31906-04-4",
     "family": [
       "floral"
@@ -386,6 +404,7 @@
   {
     "id": "methyl-anthranilate",
     "name": "Methyl Anthranilate",
+    "cid": 8635,
     "cas": "134-20-3",
     "family": [
       "fruity"
@@ -407,6 +426,7 @@
   {
     "id": "musk-ketone",
     "name": "Musk Ketone",
+    "cid": 6669,
     "cas": "81-14-1",
     "family": [
       "musky"
@@ -428,6 +448,7 @@
   {
     "id": "musk-xylene",
     "name": "Musk Xylene",
+    "cid": 62329,
     "cas": "81-15-2",
     "family": [
       "musky"
@@ -449,6 +470,7 @@
   {
     "id": "vanillin",
     "name": "Vanillin",
+    "cid": 1183,
     "cas": "121-33-5",
     "family": [
       "gourmand"

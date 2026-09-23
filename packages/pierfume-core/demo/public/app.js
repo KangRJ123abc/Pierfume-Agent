@@ -11,14 +11,19 @@ const FAMILY_COLOR = {
 const famColor = (f) => FAMILY_COLOR[f] ?? "#8d7f68";
 
 // ---------------- tabs ----------------
-const VIEWS = ["chat", "generate", "validate", "diff"];
+// "formula" 是详情页(无导航按钮),由配方库/轮盘点入,详见 pages.js
+const VIEWS = ["chat", "generate", "validate", "diff", "library", "create", "wheel", "formula"];
 function showTab(which) {
   for (const v of VIEWS) {
     $(`#view-${v}`).classList.toggle("hidden", which !== v);
-    $(`#tab-${v}`).classList.toggle("active", which === v);
+    const tab = $(`#tab-${v}`);
+    if (tab) tab.classList.toggle("active", which === v);
   }
 }
-for (const v of VIEWS) $(`#tab-${v}`).addEventListener("click", () => showTab(v));
+for (const v of VIEWS) {
+  const el = $(`#tab-${v}`);
+  if (el) el.addEventListener("click", () => showTab(v));
+}
 showTab("chat");
 
 // ---------------- init form ----------------

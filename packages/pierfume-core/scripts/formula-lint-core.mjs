@@ -7,6 +7,7 @@
  *   1. YAML 可解析
  *   2. 符合 schemas/formula.schema.json
  *   3. formula[].materialRef 必须在 data/materials.sample.json 中存在(跨文件引用完整性)
+ *   3b. pyramid 前/中/后调引用必须存在,且须同时出现在 formula 组成中
  *   4. 同一 materialRef 不得重复出现
  *   5. 各 pct 合计 ≈ 100(容差 SUM_TOLERANCE,防四舍五入误报)
  *
@@ -103,6 +104,22 @@ export function lintFormulaYaml(raw, label, project = {}) {
       const m = matById.get(ref);
       if (m && !m.provenance?.humanVerified) unverifiedRefs.push(ref);
     });
+  }
+
+  // 3b. 香调金字塔:refs 存在 + 与 formula 组成一致
+  if (doc.pyramid && typeof doc.pyramid === "object" && !Array.isArray(doc.pyramid)) {
+    const compRefs = new Set(
+      Array.isArray(doc.formula) ? doc.formula.map((i) => i?.materialRef).filter((x) => typeof x === "string") : [],
+    );
+    for (const tier of ["top", "heart", "base"]) {
+      const arr = doc.pyramid[tier];
+      if (!Array.isArray(arr)) continue;
+      arr.forEach((ref, i) => {
+        if (typeof ref !== "string") return; // 类型错误已由 schema 报告
+        if (!matById.has(ref)) errors.push(`${label}.pyramid.${tier}[${i}]: 引用的原料不存在: "${ref}"`);
+        else if (!compRefs.has(ref)) errors.push(`${label}.pyramid.${tier}[${i}]: 金字塔原料未在配方组成中出现: "${ref}"`);
+      });
+    }
   }
 
   // 项目级红线:客户禁限用清单(pierfume.project.json 的 bannedMaterials)

@@ -8,12 +8,18 @@ meta:
   author: 调香师 B
   createdAt: 2026-09-21
   status: draft
+  accord: oriental
   notes: D2 阶段测试配方之一,验证 formula-lint
 
 product:
   name: 麝香琥珀淡香精
   category: "4"
   fragranceUseLevelPct: 15
+
+pyramid:
+  top: [ethanol]
+  heart: [alpha-isomethyl-ionone, hydroxycitronellal, methyl-anthranilate, eugenol, cinnamal]
+  base: [benzyl-salicylate, musk-ketone, vanillin, coumarin]
 
 formula:
   - materialRef: benzyl-salicylate

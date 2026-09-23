@@ -2,12 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pierfume.local/schemas/materials.schema.json",
   "title": "Pierfume materials dataset",
-  "description": "原料测试数据集。事实性字段(CAS、IFRA 限量引用)只能来自 data/ 下的文件;AI 整理的初稿 humanVerified 必须为 false,人工逐条核对后方可置 true。",
+  "description": "原料测试数据集。事实性字段(CID、CAS、IFRA 限量引用)只能来自 data/ 下的文件;AI 整理的初稿 humanVerified 必须为 false,人工逐条核对后方可置 true。CID 必填:机器添加走 PubChem CID;客观无法提供(如用户自有原料)时允许字面量 \"用户自有\"。",
   "type": "array",
   "items": {
     "type": "object",
     "additionalProperties": false,
-    "required": ["id", "name", "cas", "family", "note", "provenance"],
+    "required": ["id", "name", "cid", "family", "note", "provenance"],
     "properties": {
       "id": {
         "type": "string",
@@ -24,10 +24,16 @@
         "items": { "type": "string" },
         "uniqueItems": true
       },
+      "cid": {
+        "type": ["integer", "string"],
+        "exclusiveMinimum": 0,
+        "pattern": "^用户自有$",
+        "description": "PubChem CID(必填,正整数);客观无法提供时允许字面量 \"用户自有\"。integer 走 exclusiveMinimum,string 走 pattern(迷你校验器对不同类型关键字分别生效)"
+      },
       "cas": {
         "type": "string",
         "pattern": "^\\d{2,7}-\\d{2}-\\d$",
-        "description": "CAS 号(格式 + 校验位由 validate-data 脚本验证)"
+        "description": "CAS 号(格式 + 校验位由 validate-data 脚本验证)。cid 为整数时必填(经 PubChem 机器核验);cid=\"用户自有\" 时可省略"
       },
       "fema": {
         "type": "string",

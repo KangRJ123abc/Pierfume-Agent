@@ -283,6 +283,8 @@ function cardFromDetails(d, toolName) {
 	if (d.kind === "headroom") return headroomCard(d);
 	if (d.kind === "alternatives") return alternativesCard(d);
 	if (d.kind === "save") return saveCard(d);
+	if (d.kind === "heatmap") return heatmapCard(d);
+	if (d.kind === "material-save") return materialSaveCard(d);
 	return null;
 }
 
@@ -349,6 +351,133 @@ function saveCard(d) {
 		</div>
 		${d.diff ? `<div class="muted small">变更:调 ${d.diff.changed.length} / 增 ${d.diff.added.length} / 删 ${d.diff.removed.length}</div>` : ""}
 		<div class="muted small">lint ${d.lint?.ok ? "✅" : "❌"} · ifra ${d.ifra ? (d.ifra.ok ? "✅" : `❌ ${d.ifra.violationCount} 项违规`) : "—"}</div>`;
+	return div;
+}
+
+// 配方热图卡片:details.kind === "heatmap"(formula_heatmap 工具,纯手写 SVG,无图表库)
+// 行 = 配方 label,列 = 原料 name(后端已按总用量降序);单元格色阶 0→透明,越大越深
+function heatmapCard(d) {
+	const div = document.createElement("div");
+	div.className = "data-card heatmap-card";
+	if (!d.ok) {
+		div.innerHTML = `<div class="card-head"><strong>配方热图</strong><span class="status-pill bad">生成失败</span></div>
+			<div class="error-box">${(d.errors ?? []).map(chatEsc).join("<br>")}</div>`;
+		return div;
+	}
+	const mats = d.materials ?? [];
+	const rows = d.rows ?? [];
+	if (!mats.length || !rows.length) {
+		div.innerHTML = `<div class="card-head"><strong>配方热图</strong></div><p class="muted small">无数据。</p>`;
+		return div;
+	}
+	const max = Math.max(1, ...rows.flatMap((r) => (r.values ?? []).filter((v) => typeof v === "number")));
+	const labelW = 150, cellW = 56, headH = 104, cellH = 30, pad = 4;
+	const w = labelW + mats.length * cellW + pad;
+	const h = headH + rows.length * cellH + pad;
+	const NS = "http://www.w3.org/2000/svg";
+	const svg = document.createElementNS(NS, "svg");
+	svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+	svg.setAttribute("class", "heatmap-svg");
+	// 列表头(斜排原料名)
+	mats.forEach((m, j) => {
+		const x = labelW + j * cellW + cellW / 2;
+		const text = document.createElementNS(NS, "text");
+		text.setAttribute("class", "hm-head");
+		text.setAttribute("transform", `translate(${x},${headH - 10}) rotate(-45)`);
+		const short = (m.name ?? m.id).length > 20 ? (m.name ?? m.id).slice(0, 19) + "…" : (m.name ?? m.id);
+		text.textContent = short;
+		const t = document.createElementNS(NS, "title");
+		t.textContent = m.name ?? m.id;
+		text.appendChild(t);
+		svg.appendChild(text);
+	});
+	// 行
+	rows.forEach((r, i) => {
+		const y = headH + i * cellH;
+		const short = String(r.label ?? `row-${i + 1}`);
+		const label = document.createElementNS(NS, "text");
+		label.setAttribute("class", "hm-rowlabel");
+		label.setAttribute("x", labelW - 8);
+		label.setAttribute("y", y + cellH / 2 + 4);
+		label.setAttribute("text-anchor", "end");
+		label.textContent = short.length > 22 ? short.slice(0, 21) + "…" : short;
+		const lt = document.createElementNS(NS, "title");
+		lt.textContent = short;
+		label.appendChild(lt);
+		svg.appendChild(label);
+		(r.values ?? []).forEach((v, j) => {
+			const rect = document.createElementNS(NS, "rect");
+			rect.setAttribute("x", labelW + j * cellW);
+			rect.setAttribute("y", y);
+			rect.setAttribute("width", cellW - 1.5);
+			rect.setAttribute("height", cellH - 1.5);
+			rect.setAttribute("rx", 3);
+			rect.setAttribute("class", "hm-cell");
+			if (v === null || v === undefined) {
+				rect.setAttribute("fill", "#efe7d6"); // 该配方不含此原料
+			} else if (v <= 0) {
+				rect.setAttribute("fill", "#faf6ec");
+			} else {
+				rect.setAttribute("fill", `rgba(169,116,28,${(0.16 + 0.72 * (v / max)).toFixed(3)})`);
+			}
+			const title = document.createElementNS(NS, "title");
+			title.textContent = v === null || v === undefined ? `${r.label} × ${mats[j].name} = 不含` : `${r.label} × ${mats[j].name} = ${v}%`;
+			rect.appendChild(title);
+			svg.appendChild(rect);
+			if (typeof v === "number" && v > 0) {
+				const tv = document.createElementNS(NS, "text");
+				tv.setAttribute("class", `hm-val${v / max <= 0.45 ? " dim" : ""}`);
+				tv.setAttribute("x", labelW + j * cellW + (cellW - 1.5) / 2);
+				tv.setAttribute("y", y + cellH / 2 + 3.5);
+				tv.textContent = String(Math.round(v * 100) / 100);
+				svg.appendChild(tv);
+			}
+		});
+	});
+	const head = document.createElement("div");
+	head.className = "card-head";
+	head.innerHTML = `<strong>配方热图</strong><span class="muted small">${rows.length} 个配方 × ${mats.length} 种原料(列按总用量降序,悬停看数值)</span>`;
+	div.appendChild(head);
+	div.appendChild(svg);
+	return div;
+}
+
+// 原料写入结果卡片:details.kind === "material-save"(material_add / material_update 工具)
+function materialSaveCard(d) {
+	const div = document.createElement("div");
+	div.className = "data-card mat-save-card";
+	let head = "";
+	let body = "";
+	if (d.written && Array.isArray(d.materials)) {
+		div.classList.add("save-ok");
+		head = `<strong>已写入 ${d.materials.length} 个原料</strong><span class="status-pill" style="background:#3d7a4e">✅ 已写入</span>`;
+		body = `<table class="report"><tr><th>id</th><th>名称</th><th>CID</th><th>CAS</th></tr>` +
+			d.materials.map((m) => `<tr><td>${chatEsc(m.id)}</td><td>${chatEsc(m.name ?? "")}</td><td class="num">${chatEsc(String(m.cid ?? "—"))}</td><td class="num">${chatEsc(m.cas ?? "—")}</td></tr>`).join("") +
+			`</table>` +
+			(d.warnings?.length ? `<ul class="notices">${d.warnings.map((x) => `<li>⚠️ ${chatEsc(x)}</li>`).join("")}</ul>` : "") +
+			(d.failures?.length ? `<ul class="notices">${d.failures.map((x) => `<li>❌ 解析失败:${chatEsc(x)}</li>`).join("")}</ul>` : "");
+	} else if (d.written && d.id) {
+		// material_update:单条校正,展示 before → after
+		div.classList.add("save-ok");
+		head = `<strong>已校正原料 ${chatEsc(d.id)}</strong><span class="status-pill" style="background:#3d7a4e">✅ 已写入</span>`;
+		const keys = Object.keys(d.after ?? {});
+		body = `<table class="report"><tr><th>字段</th><th>旧值</th><th>新值</th></tr>` +
+			keys.map((k) => {
+				const o = JSON.stringify(d.before?.[k] ?? null);
+				const n = JSON.stringify(d.after?.[k] ?? null);
+				return o === n ? "" : `<tr><td>${chatEsc(k)}</td><td class="num">${chatEsc(o)}</td><td class="num">${chatEsc(n)}</td></tr>`;
+			}).join("") + `</table>` +
+			`<p class="muted small">humanVerified 已重置为 false,须重新人工核对。</p>`;
+	} else if (d.cancelled) {
+		div.classList.add("save-cancel");
+		head = `<strong>已取消</strong><span class="status-pill" style="background:#8d7f68">未写入</span>`;
+		body = `<p class="muted small">用户拒绝了本次写入,原料库未改动。</p>`;
+	} else {
+		div.classList.add("save-bad");
+		head = `<strong>${d.rolledBack ? "写入后校验失败,已回滚" : "未写入"}</strong><span class="status-pill bad">❌</span>`;
+		body = `<ul class="notices">${(d.errors ?? ["未知错误"]).map((x) => `<li>${chatEsc(x)}</li>`).join("")}</ul>`;
+	}
+	div.innerHTML = `<div class="card-head">${head}</div>${body}`;
 	return div;
 }
 
