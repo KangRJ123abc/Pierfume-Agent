@@ -1,7 +1,7 @@
 # Pierfume Agent — AGENTS.md
 
 > 项目级上下文文件。AI 助手接手本仓库任务前必须先读本文件,再读 [docs/Pierfume-Agent-项目初始文档.md](docs/Pierfume-Agent-项目初始文档.md)(第一上下文来源,范围/验收/红线以此为准)。
-> 更新:2026-09-22(对话主线 P0–P2 完成:GUI 以 pi RPC 聊天为默认页,含审批桥、数据卡片、批量审查、谱系、合规余量;P3 OpenPOM 未做)。
+> 更新:2026-09-23(GitHub 私有仓库已建并推送 KangRJ123abc/Pierfume-Agent;对话页两 bug 已修;远程 = 本地 46e48ab)。
 
 ## 1. 项目一句话
 
@@ -72,6 +72,8 @@ Pierfume_Agent/
   - 前端对话页:流式气泡/思考折叠/工具行/数据卡片(原料卡含人工核对徽章=可信度);会话列表/新建/恢复;审批弹层
   - P1:配方谱系(`/api/lineage`,库文件命名 `<id>-v<version>.yaml`)+ 状态徽章;P2:批量审查(校验页批量模式,`---` 分隔多配方)
   - 已知:内嵌浏览器自动化的 element.click 对该页按钮偶发假点击(真实浏览器正常);两个经典脚本禁止重复顶层 const(app.js 与 chat.js 曾因此静默失效)
+  - **2026-09-22 晚修复两 bug**(提交 64b549c):①agent_start/settled 分支误写 `chat$.querySelector`(chat$ 是函数)→ 每轮对话收尾必抛 TypeError;②服务器重启后 /events 404 → EventSource 僵尸重连占满连接数 → 状态卡死「连接中断」。修复:/events 与 /message 遇目录即自动 --continue 恢复 + SSE 20s 心跳;前端连续 3 次失败主动停止重连;发送 410 自动 resume 重试一次。实测重启场景自动恢复 ✓
+  - 真实使用观察(2026-09-23):用户已用对话页完成铃兰(muguet)原料调研——Agent 正确拒答无条目原料的限量并引红线 3;**数据缺口确认**:库内缺现代铃兰主料(Florhydral/Bourgeonal/Florol 等),linalool/limonene 的 specification 参数仍待补(入库走 PubChem 核验 + 人工确认)
 
 ## 4. 数据现状与缺口
 
@@ -171,6 +173,13 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 - 前端事件断点:服务端给每条事件配单调 seq 落盘,SSE 支持 `?since=seq` 补发;前端按 seq 去重;历史回放只渲染终态事件(message_end/tool_execution_end),不回放一次性 ui_request
 - 陷阱:两个经典 <script> 共享全局作用域,顶层 `const` 重名(STATUS_COLOR 等)会导致后加载脚本**整体静默失效**(无控制台报错到页面上)——已踩过,chat.js 全部加 `chat` 前缀隔离
 
+### 7.6 GitHub 私有仓库推送链路(2026-09-23 建立)
+- 远端:`origin = https://github.com/KangRJ123abc/Pierfume-Agent.git`(**private**);首次推送 46e48ab,`master` 已跟踪
+- 本机 GitHub 直连不通;**走本机 Clash 代理 127.0.0.1:7897**(config 级:`git config http.https://github.com.proxy http://127.0.0.1:7897`,仅 github.com 生效;代理端口变了改这条)
+- 凭据:Git Credential Manager(系统级)已保存,push/pull 免登录;未装 gh CLI
+- 推前红线自查:pi/ 与 .pi/ 未跟踪、node_modules/workspace 已忽略、无密钥落库(DEEPSEEK_API_KEY 只在本机环境变量);`.claude/settings.json` 刻意不入库
+- 日常:`git push` / `git pull` 即可;无代理时 GitHub 操作会超时
+
 ## 8. 设计决策备忘
 
 - **单一事实来源**:限量数值只存在 `data/ifra-rules.json`;materials 通过 `ifraEntryRef` 引用,禁止抄录限量数值到原料表
@@ -188,9 +197,19 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 
 ## 9. 待办与下一步
 
-1. [x] ~~定义**配方 YAML Schema**~~(D1,提交 87952e0)
-2. [x] ~~**formula-lint 扩展**~~(D2,提交 7c2c62e;网络验证 + 三层测试 24 断言全绿,见 §7.3)
-3. [x] ~~**ifra-check 扩展(D3)**~~(提交 4857dff;合规断言 2026-09-22 经人工确认,红线 5)
-4. [x] ~~打包验证 `pi install` + 端到端 demo~~(D5,2026-09-22;双 scope 安装验证 + 真实 brief demo 通过,见 §3/§7.4)
-5. [x] ~~git init~~(首个提交 aa88e64)
-6. 测试断言需基于人工核对后的数据,编写时向用户确认
+**已完成(2026-09-21 → 09-23,远程 master = 46e48ab):**
+1. [x] ~~定义**配方 YAML Schema**~~(D1,87952e0)
+2. [x] ~~**formula-lint 扩展**~~(D2,7c2c62e;三层测试全绿,§7.3)
+3. [x] ~~**ifra-check 扩展(D3)**~~(4857dff;合规断言经人工确认,红线 5)
+4. [x] ~~打包验证 `pi install` + 端到端 demo~~(D5,0a7213e;§7.4)
+5. [x] ~~git init + **GitHub 私有仓库**~~(aa88e64 → KangRJ123abc/Pierfume-Agent,2026-09-23 推送,§7.6)
+6. [x] ~~demo GUI(atelier 风格)~~(2a57783)
+7. [x] ~~配方工作台闭环:diff/禁限用清单/导出~~(52b1a87)
+8. [x] ~~对话主线 P0–P2(RPC 聊天/审批桥/卡片/批量/谱系/余量)~~(ebfe997 + 修复 64b549c)
+
+**下一步(按优先级):**
+1. **数据扩充**(用户暂停中,重启时从这里开始):现代铃兰原料(Florhydral/Bourgeonal/Florol 等,先 PubChem 机器核验再人工确认)、linalool/limonene 的 specification 参数、原料 22→50+、IFRA 规则 18→80+
+2. **MVP 验收 #4**:测试配方 8→10 个并全量回归(D6–D7 范畴)
+3. P3(可选):OpenPOM 气味预测工具(SMILES→描述符,本地推理)+ 预测条形图卡片
+4. 提示词/经验沉淀为 skills(§7 场景 4:知识沉淀)
+5. 合规相关测试断言持续遵守红线 5(人工确认后合入)
