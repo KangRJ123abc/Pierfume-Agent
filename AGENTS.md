@@ -195,6 +195,7 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 - 前端事件断点:服务端给每条事件配单调 seq 落盘,SSE 支持 `?since=seq` 补发;前端按 seq 去重;历史回放只渲染终态事件(message_end/tool_execution_end),不回放一次性 ui_request
 - 陷阱:两个经典 <script> 共享全局作用域,顶层 `const` 重名(STATUS_COLOR 等)会导致后加载脚本**整体静默失效**(无控制台报错到页面上)——已踩过,chat.js 全部加 `chat` 前缀隔离;pages.js 统一 `lib`/`wheel` 前缀
 - 2026-09-23(dedc27c):CHAT_TOOLS 白名单增 `material_add,material_update,formula_heatmap`,spawnChat 增挂 `-e extensions/data-admin`(扩展不挂载则白名单条目无效);写盘工具审批沿用 `extension_ui_request/response` 桥,material-save/heatmap 卡片走 `tool_execution_end` 的 `result.details`
+- **2026-09-28 陷阱(api() 无 body 发 GET)**:前端 `api(path, body)` 在 body 省略时发 GET,而 server 端点多为 POST-only → 拿到 404 的 `{error}` 对象,**解构 `id` 为 undefined 且不校验**会级联出幽灵会话:ES 永久 404、状态卡死、下拉跳占位符、`join(undefined)` 500(085b842 修复 + /new 兼收 GET/POST + id 校验 + [req]/[err] 日志)。**凡是服务端返回的 id/列表,前端必须先校验再使用**;诊断靠 `[req]` 日志区分"没到服务端"与"到了但没落库"
 
 ### 7.6 GitHub 私有仓库推送链路(2026-09-23 建立)
 - 远端:`origin = https://github.com/KangRJ123abc/Pierfume-Agent.git`(**private**);首次推送 46e48ab,`master` 已跟踪
