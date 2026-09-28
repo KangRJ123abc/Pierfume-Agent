@@ -411,6 +411,24 @@ const server = createServer(async (req, res) => {
 			saveMaterialsFile(result.next);
 			return send(res, 200, { before: mapMaterial(result.before), after: mapMaterial(result.after) });
 		}
+		// 人工核对确认:provenance.humanVerified=true + 核对人/日期(服务端统一构造,provenance 不接受客户端直改)
+		if (req.method === "POST" && path === "/api/materials-admin/verify") {
+			const { id } = JSON.parse(await readBody(req));
+			if (typeof id !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) return send(res, 400, { error: "bad id" });
+			const materials = loadMaterialsFile();
+			const m = materials.find((x) => x.id === id);
+			if (!m) return send(res, 404, { error: "not found" });
+			if (m.provenance?.humanVerified) return send(res, 200, { already: true, material: mapMaterial(m) });
+			const today = new Date().toISOString().slice(0, 10);
+			const after = {
+				...m,
+				provenance: { ...m.provenance, humanVerified: true, verifiedBy: "人工核对(GUI)", verifiedAt: today },
+			};
+			const errors = validateDraft(after);
+			if (errors.length) return send(res, 400, { errors });
+			saveMaterialsFile(materials.map((x) => (x.id === id ? after : x)));
+			return send(res, 200, { before: mapMaterial(m), after: mapMaterial(after) });
+		}
 		// Pyrfume staging:?q= 名称/CAS 子串(大小写不敏感),?pending=1 只看未入库
 		if (req.method === "GET" && path === "/api/staging") {
 			let items = loadStaging();

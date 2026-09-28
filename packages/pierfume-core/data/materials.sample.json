@@ -488,5 +488,27 @@
       "verifiedBy": "人工核对",
       "verifiedAt": "2026-09-21"
     }
+  },
+  {
+    "id": "benzyl-acetate",
+    "name": "benzyl acetate",
+    "cid": 8785,
+    "cas": "140-11-4",
+    "family": [
+      "floral",
+      "fruity"
+    ],
+    "note": "heart",
+    "odor": "jasmine, sweet, fruity (pear/banana)",
+    "ifraEntryRef": null,
+    "provenance": {
+      "sources": [
+        "PubChem CID 8785 (PUG REST 机器解析 2026-09-28;名称/分子量来自 PubChem,CAS 经校验位算法)",
+        "material_update 修改 2026-09-28: name,cid,cas,family,note,odor,ifraEntryRef",
+        "material_update 修改 2026-09-28: name,cid,cas,family,note,odor,ifraEntryRef",
+        "material_update 修改 2026-09-28: name,cid,cas,family,note,odor,ifraEntryRef"
+      ],
+      "humanVerified": false
+    }
   }
 ]

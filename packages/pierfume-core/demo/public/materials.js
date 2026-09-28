@@ -89,12 +89,40 @@ function matRenderTable() {
 		<td>${(m.family ?? []).map((f) => `<span class="chip"><i class="dot" style="background:${famColor(f)}"></i>${esc(f)}</span>`).join(" ")}</td>
 		<td>${esc(m.note ?? "—")}</td>
 		<td class="muted small">${esc(m.odor ?? "—")}</td>
-		<td>${matVerifiedBadge(m)}</td>
+		<td>${matVerifiedBadge(m)}${m.humanVerified ? "" : ` <button class="btn ghost slim" data-mat-verify="${esc(m.id)}" title="人工逐条核对完成后,标记为已核对">✓ 核对</button>`}</td>
 	</tr>`).join("");
 	box.innerHTML = `<table class="report mat-table">
 		<tr><th>名称</th><th>id</th><th>CID</th><th>CAS</th><th>香型</th><th>香阶</th><th>气味</th><th>核对</th></tr>${rows}</table>`;
 	box.querySelectorAll("[data-mat-id]").forEach((tr) =>
 		tr.addEventListener("click", () => matOpenForm("edit", { id: tr.dataset.matId })));
+	box.querySelectorAll("[data-mat-verify]").forEach((b) => b.addEventListener("click", (e) => {
+		e.stopPropagation(); // 行点击是打开编辑,核对按钮独立
+		matVerify(b.dataset.matVerify);
+	}));
+}
+
+// 人工核对确认:二次确认清单 → POST verify → 差异展示
+async function matVerify(id) {
+	const m = matCache.byId[id];
+	if (!m) return;
+	const ok = window.confirm(
+		`确认完成「${m.name}」的人工核对?\n\n请逐项确认:\n` +
+		`· CID / CAS 与权威来源(PubChem 页面)一致\n` +
+		`· 名称、香型、香阶、气味描述符合实际\n` +
+		`· IFRA 条目引用正确(有挂条目时)\n\n` +
+		`确认后将标记为「已人工核对」并记录核对人与日期。`,
+	);
+	if (!ok) return;
+	try {
+		const data = await libFetchJson("/api/materials-admin/verify", { id });
+		matCache.loaded = false;
+		await matEnsureData();
+		matRenderTable();
+		matShowDiff(data.before, data.after ?? data.material,
+			`✅ 已人工核对 · ${esc((data.after ?? data.material).name)} <span class="muted small">核对人与日期已记录</span>`);
+	} catch (e) {
+		alert(`核对标记失败:${e.message}`);
+	}
 }
 
 // ---------------- Pyrfume staging ----------------
@@ -267,16 +295,16 @@ function matOpenForm(mode, preset = {}) {
 	});
 }
 
-// 编辑保存后的差异结果(before → after)
-function matShowDiff(before, after) {
-	const label = { name: "名称", cid: "CID", cas: "CAS", family: "香型", note: "香阶", odor: "气味", ifraEntryRef: "IFRA 条目" };
+// 编辑/核对后的差异结果(before → after);headline 自定义标题行
+function matShowDiff(before, after, headline = null) {
+	const label = { name: "名称", cid: "CID", cas: "CAS", family: "香型", note: "香阶", odor: "气味", ifraEntryRef: "IFRA 条目", humanVerified: "核对状态" };
 	const rows = [];
 	for (const [k, lab] of Object.entries(label)) {
 		const o = JSON.stringify(before?.[k] ?? null);
 		const n = JSON.stringify(after?.[k] ?? null);
 		if (o !== n) rows.push(`<tr><td>${lab}</td><td class="num">${esc(o)}</td><td class="num">${esc(n)}</td></tr>`);
 	}
-	$("#mat-notice").innerHTML = `<div class="card mat-diff"><h3>已保存 · ${esc(after.name)} <span class="muted small">核对状态已重置 ⚠️ 未核对</span></h3>` +
+	$("#mat-notice").innerHTML = `<div class="card mat-diff"><h3>${headline ?? `已保存 · ${esc(after.name)} <span class="muted small">核对状态已重置 ⚠️ 未核对</span>`}</h3>` +
 		(rows.length
 			? `<table class="report"><tr><th>字段</th><th>旧值</th><th>新值</th></tr>${rows.join("")}</table>`
 			: `<p class="muted small">字段无变化。</p>`) + `</div>`;
