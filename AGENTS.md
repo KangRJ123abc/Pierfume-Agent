@@ -83,7 +83,7 @@ Pierfume_Agent/
   - **P2/P3 前端**:`meta.accord`(12 香调)+ `pyramid`(前中后调)入 formula schema,lint 增金字塔规则(引用须存在且须在组成中);server 端点 `/api/material(s)`、`/api/library`(recipes[])、`/api/formula`、`POST /api/formula`(fm-NNNN 自动编号,lint 硬门,失败不占号);前端 `pages.js`:配方库/详情(原料资料卡模态)/新建表单(金字塔 chip 自动补配比行)/SVG 香调轮盘 12 宫格;chat.js 渲染 heatmap 与 material-save 卡片;聊天白名单加三工具并挂载 data-admin 扩展
   - **自测与未验证**:离线两层 33 断言全绿 + 3211 端口 curl 全端点通过(建配方/详情/404/400 lint 拦截/穿越防护/序号递增且失败不占号);3210 已重启为新代码。**浏览器端运行时未自动化验证**(热图/轮盘/资料卡弹层需真实浏览器过目);写盘工具的 RPC 审批链路沿用 formula_save 已验证机制,尚未在对话中实测 material_add 端到端
 - [x] **原料库管理 GUI(2026-09-28,提交 b384142)**:原料增/改的前端入口 + Pyrfume staging 待入库区(前端 + demo server 端点)
-  - **Pyrfume 全量导入结果**:10,262 条 CID>0 分子入 staging,9,009 条机器核验 CAS(88%,PubChem 批量补全零失败),4,561 条 goodscents 气味描述,库内 22 条自动 imported;staging 契约 `{cid,name,cas,odor,datasets[],imported}` 无 family/note(受控词表留待入库时人/Agent 定)
+  - **Pyrfume 导入管线(数据已按用户决定弃用,管线保留可重跑)**:2026-09-28 曾全量导入 10,262 条 CID>0 分子入 staging(9,009 条机器核验 CAS、4,561 条 goodscents 气味描述);用户审查后认为字段不全,**staging 数据已删除**;提取/导入脚本与 venv/克隆保留(`npm run import:pyrfume:extract` → `npm run import:pyrfume`,§7.1),staging 页对缺失文件按空处理。教训:外部数据集入库前应先给用户看样例再全量跑
   - server.mjs:`GET /api/materials-admin`(复用 mapMaterial)、`GET /api/ifra-entries`(ifra-rules.json → id+name 下拉)、`POST /api/materials-admin`(body {id?,name,cid(正整数|"用户自有"),cas?,family[],note,odor?,ifraEntryRef?};buildDraft/validateDraft/mergeAdd/saveMaterialsFile 复用 material-admin-core;整数 CID 现场查 PubChem(事实字段唯一来源,红线 3);id/cid 冲突 409,校验失败 400;provenance.sources 追加「用户手动录入(GUI)」;`?staging=<cid>` 成功后翻转 staging imported)、`PUT /api/materials-admin`({id,patch};patch 键白名单 name/cid/cas/family/note/odor/ifraEntryRef,额外键剔除;mergeUpdate → humanVerified 重置 false;未知 id 404;返回 {before,after})、`GET /api/staging`(`?q=` name/cas 子串、`?pending=1`;文件不存在/JSON 坏按 [])
   - staging 契约:`demo/workspace/pyrfume.staging.json` = [{cid,name,cas,odor,datasets[],imported}],Pyrfume 草稿**无 family/note**(受控词表人/Agent 定,staging 存在的意义);读写封装 loadStaging/saveStaging
   - 前端 `demo/public/materials.js`(顶层全 `mat` 前缀;复用 pages.js 的 libFetchJson):主库区(搜索 name/id/cas + family 下拉 + 核对状态下拉;表格行点击 → 编辑模态,cid 支持「PubChem CID|用户自有」单选切换、family 18 词表 chip 多选、note radio、ifraEntryRef 下拉含「无」=null;保存 PUT 后显示 before→after 差异,**cid 与 cas 可同编辑**);手动添加(同表单空白版,id 可显式给——纯中文名 kebab 生成失败时必填);Pyrfume 待入库区(搜索防抖 + 只看未入库;「入库」按钮预填表单(name/cid/cas/odor 带入,datasets 提示),提交带 `?staging=` 成功行变灰)
@@ -96,7 +96,7 @@ Pierfume_Agent/
 | 原料 | 22 条 | 50–100 条 |
 | IFRA 规则 | 18 条 | 80–100 条 |
 
-**Pyrfume staging(2026-09-28,b384142)**:10,262 条带 CID 分子已入待入库区(`demo/workspace/pyrfume.staging.json`,9,009 条带机器核验 CAS、4,561 条带气味描述词);入库 = 原料库页选 family/note 后提升,或让 Agent 批量办理。原料扩充从"逐条建"变为"从 staging 挑"。
+**Pyrfume staging(2026-09-28,b384142;数据已按用户决定删除)**:曾导入 10,262 条带 CID 分子(9,009 条机器核验 CAS、4,561 条气味描述),用户审查后弃用(字段不全);管线脚本/venv/克隆保留在 gitignored workspace,`npm run import:pyrfume*` 可重跑。原料扩充仍走"用户手动录入(GUI)+ Agent material_add"两条路。
 
 **待人工提供的数据**(已在报告中记录,尚未入库):
 - `iso-e-super`(常见引用 54464-57-2,未验证)、`oakmoss-absolute`(9000-50-4?)、`bergamot-oil`(8007-75-8?)——混合物/天然提取物,需权威 CAS
@@ -202,6 +202,7 @@ pi list -a                                 # 查看项目级包(不加 -a 只列
 - 凭据:Git Credential Manager(系统级)已保存,push/pull 免登录;未装 gh CLI
 - 推前红线自查:pi/ 与 .pi/ 未跟踪、node_modules/workspace 已忽略、无密钥落库(DEEPSEEK_API_KEY 只在本机环境变量);`.claude/settings.json` 刻意不入库
 - 日常:`git push` / `git pull` 即可;无代理时 GitHub 操作会超时
+- **2026-09-28 增补**:Clash 在线但 GitHub 上游偶发极慢/不稳定时,默认 schannel TLS 后端会报 `schannel: failed to receive handshake`(连接其实已通)——**已固化仓库级 `http.sslBackend=openssl`**,push/pull 不再受 schannel 影响;诊断口诀:先 `curl -x http://127.0.0.1:7897 https://www.baidu.com` 判代理活性,再 `curl -x ... https://github.com -m 15` 判上游速度
 
 ## 8. 设计决策备忘
 
