@@ -136,7 +136,7 @@ function onDelta(ev) {
 	if (d.type === "text_delta") {
 		if (!chat.streamEl) newAssistantBubble();
 		chat.streamBuf += d.delta;
-		chat.streamEl.querySelector(".bubble-text").textContent = chat.streamBuf;
+		chat.streamEl.querySelector(".bubble-text").innerHTML = chatRenderMd(chat.streamBuf);
 		scrollBottom();
 	} else if (d.type === "thinking_delta") {
 		chat.thinkingBuf += d.delta;
@@ -163,7 +163,7 @@ function onMessageEnd(ev, replay = false) {
 
 function finalizeStream(text, thinking) {
 	if (!chat.streamEl) return;
-	if (typeof text === "string") chat.streamEl.querySelector(".bubble-text").textContent = text;
+	if (typeof text === "string") chat.streamEl.querySelector(".bubble-text").innerHTML = chatRenderMd(text);
 	if (thinking) {
 		chat.streamEl.insertAdjacentHTML("beforeend",
 			`<details class="thinking"><summary>思考过程</summary><pre>${chatEsc(thinking.slice(0, 4000))}</pre></details>`);
@@ -173,6 +173,13 @@ function finalizeStream(text, thinking) {
 	chat.streamBuf = "";
 	chat.thinkingBuf = "";
 	scrollBottom();
+}
+
+// Markdown 渲染(markdown.js 的 window.mdToHtml;流式中围栏未闭合时临时补收尾,避免半块代码不渲染)
+function chatRenderMd(text) {
+	let src = String(text ?? "");
+	if (((src.match(/```/g) ?? []).length % 2) === 1) src += "\n```";
+	return window.mdToHtml ? window.mdToHtml(src) : chatEsc(src);
 }
 
 function onToolStart(ev) {
