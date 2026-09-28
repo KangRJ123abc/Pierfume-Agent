@@ -131,7 +131,9 @@ node scripts/material-admin.mjs preview --cid 6549 --family floral --note top
 node scripts/material-admin.mjs add --data /tmp/copy.json --json '<draft>'
 
 # demo GUI(零新依赖;另开终端)
-npm run demo                                          # → http://127.0.0.1:3210
+npm run demo                                          # 前台运行 → http://127.0.0.1:3210
+npm run demo:detached                                 # 独立进程(detached),Kimi Code/终端关闭不死;
+                                                      # 日志 %TEMP%/pierfume-demo.log;停止:netstat 找 3210 pid → taskkill //F
 
 # pi CLI 加载真实扩展(print 模式 E2E;务必 < /dev/null 且重定向到文件)
 # 注意:Git Bash 必须 MSYS_NO_PATHCONV=1,否则 /formula-lint 被转成 D:/ruanjian/Git/...;

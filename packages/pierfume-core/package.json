@@ -17,6 +17,7 @@
     "check-ifra": "node scripts/ifra-check.mjs",
     "diff-formula": "node scripts/formula-diff.mjs",
     "demo": "node demo/server.mjs",
+    "demo:detached": "node demo/start-detached.mjs",
     "test": "node tests/formula-lint.e2e.mjs && node tests/ifra-check.e2e.mjs && node tests/formula-diff.e2e.mjs && node tests/material-admin.e2e.mjs",
     "test:formula-lint": "node tests/formula-lint.e2e.mjs",
     "test:ifra-check": "node tests/ifra-check.e2e.mjs",
