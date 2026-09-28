@@ -18,6 +18,8 @@
     "diff-formula": "node scripts/formula-diff.mjs",
     "demo": "node demo/server.mjs",
     "demo:detached": "node demo/start-detached.mjs",
+    "import:pyrfume": "node scripts/import-pyrfume.mjs",
+    "import:pyrfume:extract": "demo/workspace/.venv-pyrfume/Scripts/python.exe scripts/pyrfume-extract.py",
     "test": "node tests/formula-lint.e2e.mjs && node tests/ifra-check.e2e.mjs && node tests/formula-diff.e2e.mjs && node tests/material-admin.e2e.mjs",
     "test:formula-lint": "node tests/formula-lint.e2e.mjs",
     "test:ifra-check": "node tests/ifra-check.e2e.mjs",

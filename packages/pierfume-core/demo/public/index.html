@@ -25,6 +25,7 @@
     <button class="tab" id="tab-library" role="tab">配方库</button>
     <button class="tab" id="tab-create" role="tab">新建配方</button>
     <button class="tab" id="tab-wheel" role="tab">香调轮盘</button>
+    <button class="tab" id="tab-materials" role="tab">原料库</button>
     <button class="tab" id="tab-validate" role="tab">配方校验</button>
     <button class="tab" id="tab-diff" role="tab">配方对比</button>
   </nav>
@@ -157,6 +158,36 @@
     <div id="lib-detail"></div>
   </section>
 
+  <!-- ============ 原料库管理页(增/改 + Pyrfume staging)============ -->
+  <section id="view-materials" class="view hidden">
+    <div class="card">
+      <div class="lib-head">
+        <h2>原料库管理</h2>
+        <button id="mat-btn-add" class="btn ghost slim">＋ 手动添加原料</button>
+      </div>
+      <div class="load-row">
+        <input id="mat-filter-q" class="mat-filter-input" type="text" placeholder="搜索名称 / id / CAS">
+        <select id="mat-filter-family" class="library-sel"><option value="">全部香型</option></select>
+        <select id="mat-filter-verified" class="library-sel">
+          <option value="">全部状态</option>
+          <option value="1">已核对</option>
+          <option value="0">未核对</option>
+        </select>
+        <span id="mat-count" class="muted small"></span>
+      </div>
+      <div id="mat-notice"></div>
+      <div id="mat-table"></div>
+      <h3 id="mat-staging-title">Pyrfume 待入库</h3>
+      <p class="muted small">Pyrfume 数据集导入的草稿(只有 CID/名称/CAS/气味,缺香型与香阶——受控词表须人工或 Agent 定)。点「入库」预填添加表单。</p>
+      <div class="load-row">
+        <input id="mat-staging-q" class="mat-filter-input" type="text" placeholder="搜索 staging 名称 / CAS">
+        <label class="muted small"><input type="checkbox" id="mat-staging-pending"> 只看未入库</label>
+        <span id="mat-staging-count" class="muted small"></span>
+      </div>
+      <div id="mat-staging-table"></div>
+    </div>
+  </section>
+
   <!-- ============ 校验页 ============ -->
   <section id="view-validate" class="view hidden">
     <div class="grid">
@@ -234,5 +265,6 @@
 <script src="/static/app.js"></script>
 <script src="/static/chat.js"></script>
 <script src="/static/pages.js"></script>
+<script src="/static/materials.js"></script>
 </body>
 </html>

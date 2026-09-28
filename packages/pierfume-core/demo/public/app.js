@@ -12,7 +12,7 @@ const famColor = (f) => FAMILY_COLOR[f] ?? "#8d7f68";
 
 // ---------------- tabs ----------------
 // "formula" 是详情页(无导航按钮),由配方库/轮盘点入,详见 pages.js
-const VIEWS = ["chat", "generate", "validate", "diff", "library", "create", "wheel", "formula"];
+const VIEWS = ["chat", "generate", "validate", "diff", "library", "create", "wheel", "materials", "formula"];
 function showTab(which) {
   for (const v of VIEWS) {
     $(`#view-${v}`).classList.toggle("hidden", which !== v);

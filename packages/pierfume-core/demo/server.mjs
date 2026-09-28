@@ -25,6 +25,7 @@ import { randomUUID } from "node:crypto";
 import { checkFormulaIfra, renderMarkdownReport, computeHeadroom } from "../scripts/ifra-check-core.mjs";
 import { diffFormulas, renderMarkdownDiff } from "../scripts/formula-diff-core.mjs";
 import { lintFormulaYaml } from "../scripts/formula-lint-core.mjs";
+import { buildDraft, validateDraft, mergeAdd, mergeUpdate, saveMaterialsFile, USER_OWNED_CID } from "../scripts/material-admin-core.mjs";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
 const DEMO_ROOT = dirname(fileURLToPath(import.meta.url));
@@ -35,6 +36,8 @@ const LIBRARY = join(WORKSPACE, "library");
 const CHATS_DIR = join(WORKSPACE, "chats");
 const PI_CLI = join(PKG_ROOT, "../../pi/packages/coding-agent/dist/bundle/cli.js");
 const MATERIALS_JSON = join(PKG_ROOT, "data/materials.sample.json");
+const IFRA_RULES_JSON = join(PKG_ROOT, "data/ifra-rules.json");
+const STAGING_JSON = join(WORKSPACE, "pyrfume.staging.json");
 const VALIDATE_CLI = join(PKG_ROOT, "scripts/validate-formula.mjs");
 const IFRA_CLI = join(PKG_ROOT, "scripts/ifra-check.mjs");
 const GENERATE_TIMEOUT_MS = 420_000;
@@ -84,6 +87,22 @@ function mapMaterial(m) {
 
 function loadMaterialsFile() {
 	return JSON.parse(readFileSync(MATERIALS_JSON, "utf8"));
+}
+
+// ------------------------------------------------------------------
+// Pyrfume staging(待入库区):文件不存在 / JSON 坏时按空数组处理
+// ------------------------------------------------------------------
+function loadStaging() {
+	try {
+		const data = JSON.parse(readFileSync(STAGING_JSON, "utf8"));
+		return Array.isArray(data) ? data : [];
+	} catch {
+		return [];
+	}
+}
+
+function saveStaging(items) {
+	writeFileSync(STAGING_JSON, JSON.stringify(items, null, 2) + "\n", "utf8");
 }
 
 // ------------------------------------------------------------------
@@ -293,6 +312,98 @@ const server = createServer(async (req, res) => {
 			const m = loadMaterialsFile().find((x) => x.id === id);
 			if (!m) return send(res, 404, { error: "not found" });
 			return send(res, 200, { material: mapMaterial(m) });
+		}
+
+		// ---- 原料库管理(增/改;Pyrfume staging 待入库区)----
+		if (req.method === "GET" && path === "/api/materials-admin") {
+			return send(res, 200, { materials: loadMaterialsFile().map(mapMaterial) });
+		}
+		// IFRA 规则表条目(原料编辑表单的 ifraEntryRef 下拉)
+		if (req.method === "GET" && path === "/api/ifra-entries") {
+			const rules = JSON.parse(readFileSync(IFRA_RULES_JSON, "utf8"));
+			return send(res, 200, { entries: (rules.entries ?? []).map((e) => ({ id: e.id, name: e.name ?? e.id })) });
+		}
+		// 手动添加:body {id?, name, cid(正整数|"用户自有"), cas?, family[], note, odor?, ifraEntryRef?}
+		// 整数 cid 走 PubChem 机器解析(事实字段唯一合法来源);?staging=<cid> 成功后翻转 staging imported
+		if (req.method === "POST" && path === "/api/materials-admin") {
+			const body = JSON.parse(await readBody(req));
+			const name = String(body.name ?? "").trim();
+			if (!name) return send(res, 400, { error: "name required" });
+			const family = Array.isArray(body.family) ? body.family.filter((x) => typeof x === "string") : [];
+			if (!family.length) return send(res, 400, { error: "family required(至少一个香型)" });
+			if (!["top", "heart", "base"].includes(body.note)) return send(res, 400, { error: "bad note(top/heart/base)" });
+			const cidOk = body.cid === USER_OWNED_CID || (Number.isInteger(body.cid) && body.cid > 0);
+			if (!cidOk) return send(res, 400, { error: `cid 必须是正整数或 "${USER_OWNED_CID}"` });
+			let built;
+			try {
+				built = await buildDraft({
+					id: typeof body.id === "string" ? body.id : undefined,
+					name, cid: body.cid,
+					cas: typeof body.cas === "string" && body.cas.trim() ? body.cas.trim() : undefined,
+					family, note: body.note,
+					odor: typeof body.odor === "string" && body.odor.trim() ? body.odor.trim() : undefined,
+					ifraEntryRef: body.ifraEntryRef !== undefined ? body.ifraEntryRef : undefined,
+				});
+			} catch (e) {
+				return send(res, 400, { errors: [e instanceof Error ? e.message : String(e)] });
+			}
+			const draft = built.draft;
+			draft.provenance.sources.push("用户手动录入(GUI)");
+			const errors = validateDraft(draft);
+			if (errors.length) return send(res, 400, { errors });
+			let next;
+			try {
+				next = mergeAdd(loadMaterialsFile(), draft);
+			} catch (e) {
+				return send(res, 409, { error: e instanceof Error ? e.message : String(e) });
+			}
+			saveMaterialsFile(next);
+			const stagingCid = url.searchParams.get("staging");
+			if (stagingCid) {
+				const items = loadStaging();
+				const it = items.find((x) => String(x.cid) === String(stagingCid));
+				if (it && !it.imported) {
+					it.imported = true;
+					saveStaging(items);
+				}
+			}
+			return send(res, 200, { material: mapMaterial(draft), warnings: built.warnings });
+		}
+		// 校正:body {id, patch};patch 键白名单(name/cid/cas/family/note/odor/ifraEntryRef),cid/cas 可同编辑
+		if (req.method === "PUT" && path === "/api/materials-admin") {
+			const body = JSON.parse(await readBody(req));
+			const id = String(body.id ?? "");
+			if (!id) return send(res, 400, { error: "id required" });
+			const patch = body.patch && typeof body.patch === "object" && !Array.isArray(body.patch) ? body.patch : {};
+			const clean = {};
+			for (const k of ["name", "cid", "cas", "family", "note", "odor", "ifraEntryRef"]) {
+				if (patch[k] !== undefined) clean[k] = patch[k];
+			}
+			if (!Object.keys(clean).length) return send(res, 400, { error: "patch required(白名单:name/cid/cas/family/note/odor/ifraEntryRef)" });
+			if (clean.note !== undefined && !["top", "heart", "base"].includes(clean.note))
+				return send(res, 400, { error: "bad note(top/heart/base)" });
+			if (clean.family !== undefined && (!Array.isArray(clean.family) || !clean.family.length))
+				return send(res, 400, { error: "family 必须是非空数组" });
+			if (clean.cid !== undefined && !(clean.cid === USER_OWNED_CID || (Number.isInteger(clean.cid) && clean.cid > 0)))
+				return send(res, 400, { error: `cid 必须是正整数或 "${USER_OWNED_CID}"` });
+			let result;
+			try {
+				result = mergeUpdate(loadMaterialsFile(), id, clean);
+			} catch (e) {
+				return send(res, 404, { error: e instanceof Error ? e.message : String(e) });
+			}
+			const errors = validateDraft(result.after);
+			if (errors.length) return send(res, 400, { errors });
+			saveMaterialsFile(result.next);
+			return send(res, 200, { before: mapMaterial(result.before), after: mapMaterial(result.after) });
+		}
+		// Pyrfume staging:?q= 名称/CAS 子串(大小写不敏感),?pending=1 只看未入库
+		if (req.method === "GET" && path === "/api/staging") {
+			let items = loadStaging();
+			const q = (url.searchParams.get("q") ?? "").trim().toLowerCase();
+			if (q) items = items.filter((it) => (it.name ?? "").toLowerCase().includes(q) || (it.cas ?? "").toLowerCase().includes(q));
+			if (url.searchParams.get("pending") === "1") items = items.filter((it) => !it.imported);
+			return send(res, 200, { items });
 		}
 		if (req.method === "GET" && path === "/api/example") {
 			const name = url.searchParams.get("name") ?? "";

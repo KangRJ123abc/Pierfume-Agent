@@ -273,3 +273,24 @@ pre.raw-block {
 .mat-save-card.save-cancel { border-left: 4px solid var(--ink-soft); }
 .mat-save-card.save-bad { border-left: 4px solid var(--bad); }
 .mat-save-card table.report { font-size: 12.5px; margin-top: 4px; }
+
+/* ---------- 原料库管理页(增/改 + Pyrfume staging) ---------- */
+.mat-filter-input {
+  padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: #fff; color: var(--ink); font-family: var(--sans); font-size: 13px; min-width: 220px;
+}
+.mat-filter-input:focus { outline: 2px solid rgba(169, 116, 28, .35); border-color: var(--amber); }
+.mat-table td .chip { margin: 1px 2px 1px 0; }
+.mat-table tr[data-mat-id] { cursor: pointer; }
+.mat-table tr[data-mat-id]:hover td { background: rgba(169, 116, 28, .05); }
+.mat-staging-imported td { opacity: .55; }
+.mat-staging-info { background: #f3ecdd; border-radius: 8px; padding: 8px 12px; font-size: 12.5px; }
+.mat-modal { max-width: 640px; max-height: 88vh; overflow-y: auto; }
+.mat-cid-row { display: flex; gap: 16px; margin-bottom: 6px; }
+.mat-radio { display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; margin-right: 14px; cursor: pointer; }
+.mat-fam-box { display: flex; flex-wrap: wrap; gap: 6px; }
+.mat-fam-chip { cursor: pointer; border: 1px solid var(--line); background: #fff; font-family: var(--sans); }
+.mat-fam-chip.active { border-color: var(--amber); background: rgba(169, 116, 28, .12); color: var(--amber-deep); font-weight: 600; }
+.mat-diff { margin-bottom: 12px; }
+.mat-diff h3 { margin-top: 0; }
+.mat-notice-ok { border-left: 3px solid var(--good); padding: 10px 14px; background: rgba(61, 122, 78, .07); border-radius: 0 8px 8px 0; margin-bottom: 12px; }
