@@ -44,6 +44,16 @@ const GENERATE_TIMEOUT_MS = 420_000;
 // 聊天会话的工具白名单:危险内置工具(write/edit/bash)一律排除,
 // 数据写入只能走受审的 formula_save(内部有 ctx.ui.confirm 审批门)
 const CHAT_TOOLS = "read,material_get,formula_get,material_alternatives,formula_save,formula_lint,ifra_check,ifra_headroom,formula_diff,material_add,material_update,formula_heatmap";
+// 面向调香师的表达规约(pi --append-system-prompt):领域用户不是程序员,
+// 禁止甩 shell 命令/代码块/开发术语;事实性数据必须来自数据文件(红线 3)
+const CHAT_TONE_PROMPT = [
+	"你的用户是调香师与香水行业从业者,不是软件工程师。表达规则:",
+	"1. 全程用中文、面向领域用户说话;禁止输出 shell 命令、终端代码块、文件系统路径,除非用户主动索要。",
+	"2. 需要用户配合的操作,用界面语言描述(如\"在「原料库」页核对后保存\"),不要给命令行;提到校验时说\"校验工具会自动运行\"。",
+	"3. 内部字段与工具名(humanVerified、material_add、CID 等)第一次出现时给一句中文解释,之后用中文说法(如 humanVerified 说\"人工核对标记\")。",
+	"4. IFRA 限量、CAS 号等事实只能来自项目数据文件,不得凭记忆生成;不确定就直说不确定。",
+	"5. 配方相关建议同时照顾创意表达与合规约束,创意决策永远留给调香师。",
+].join("\n");
 
 const PORT = Number(process.argv[2]) || Number(process.env.PIERFUME_DEMO_PORT) || 3210;
 
@@ -218,6 +228,7 @@ function spawnChat(id, { resume }) {
 		"--model", "deepseek-flash",
 		"--session-dir", dir,
 		"--tools", CHAT_TOOLS,
+		"--append-system-prompt", CHAT_TONE_PROMPT,
 		"-e", join(PKG_ROOT, "extensions/formula-lint"),
 		"-e", join(PKG_ROOT, "extensions/ifra-check"),
 		"-e", join(PKG_ROOT, "extensions/data-admin"),

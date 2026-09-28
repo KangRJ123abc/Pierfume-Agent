@@ -19,6 +19,8 @@ const chat = {
 	streamEl: null,
 	streamBuf: "",
 	thinkingBuf: "",
+	pendingEchoes: [], // 本地已即时渲染的用户消息,等待服务端 message_end 回显时去重
+	toolArgs: new Map(), // toolCallId → args(tool_execution_end 不带参数,从 start 事件缓存)
 };
 
 const CHAT_STATUS_COLOR = { draft: "#8d7f68", reviewed: "#3a6ea5", approved: "#3d7a4e", archived: "#999" };
@@ -149,6 +151,8 @@ function replayEvent(rec) {
 	const ev = rec.event ?? rec;
 	if (ev.type === "message_end") onMessageEnd(ev, true);
 	else if (ev.type === "tool_execution_end") onToolEnd(ev, true);
+	// start 事件不渲染,但其参数要缓存(终态 end 事件不带 args,重放时靠它补全工具行细节)
+	else if (ev.type === "tool_execution_start") chat.toolArgs.set(ev.toolCallId, ev.args ?? null);
 	// 注意:extension_ui_request 是一次性交互,不回放(旧审批弹层不应重现)
 }
 
@@ -170,7 +174,13 @@ function onMessageEnd(ev, replay = false) {
 	const m = ev.message ?? {};
 	if (m.role === "user") {
 		const text = contentText(m);
-		if (text) addBubble("user", text);
+		if (text) {
+			// 本地发送时已即时渲染(见 sendMessage),服务端 message_end 回显需去重;
+			// 页面重放(replay)时 pendingEchoes 为空,正常渲染
+			const i = chat.pendingEchoes.indexOf(text);
+			if (i >= 0) chat.pendingEchoes.splice(i, 1);
+			else addBubble("user", text);
+		}
 		return;
 	}
 	if (m.role !== "assistant") return;
@@ -209,15 +219,18 @@ function onToolStart(ev) {
 	const row = document.createElement("div");
 	row.className = "tool-row";
 	row.id = `tool-${ev.toolCallId}`;
-	row.textContent = `⚙ ${ev.toolName} ${summarizeArgs(ev.args)}`;
+	chat.toolArgs.set(ev.toolCallId, ev.args ?? null);
+	row.textContent = `${friendlyToolLine(ev.toolName, ev.args)}…`;
 	chat$("#chat-messages").appendChild(row);
 	scrollBottom();
 }
 
 function onToolEnd(ev, replay = false) {
+	const args = ev.args ?? chat.toolArgs.get(ev.toolCallId);
+	chat.toolArgs.delete(ev.toolCallId);
 	const row = chat$(`#tool-${CSS.escape(ev.toolCallId)}`) ?? document.createElement("div");
 	row.className = "tool-row done";
-	row.textContent = `⚙ ${ev.toolName} ${ev.isError ? "· ❌" : "· ✅"}`;
+	row.textContent = `${friendlyToolLine(ev.toolName, args)} ${ev.isError ? "· ❌" : "· ✅"}`;
 	const card = cardFromDetails(ev.result?.details, ev.toolName);
 	if (card) row.appendChild(card);
 	if (!row.parentElement) chat$("#chat-messages").appendChild(row);
@@ -235,10 +248,45 @@ function contentText(m) {
 	return (m.content ?? []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
 }
 
-function summarizeArgs(args) {
-	if (!args) return "";
-	const s = JSON.stringify(args);
-	return s.length > 80 ? s.slice(0, 77) + "…" : s;
+// 工具行的领域友好展示:调香师不需要看工具名和 JSON 参数
+const TOOL_LABELS = {
+	read: "读取文件", write: "写入文件", edit: "编辑文件", bash: "执行命令",
+	material_get: "查询原料", formula_get: "读取配方", material_alternatives: "同香型替换建议",
+	formula_save: "保存配方", formula_lint: "校验配方", ifra_check: "IFRA 合规检查",
+	ifra_headroom: "合规余量计算", formula_diff: "配方对比", material_add: "添加原料",
+	material_update: "校正原料", formula_heatmap: "生成配方热图",
+};
+
+// 路径缩写:能相对到仓库根就相对,否则取末两段,超长加省略号
+function shortenPath(p) {
+	const s = String(p ?? "").replace(/\\/g, "/");
+	if (!s) return "";
+	const anchor = "Pierfume_Agent/";
+	const i = s.indexOf(anchor);
+	const rel = i >= 0 ? s.slice(i + anchor.length) : s.split("/").slice(-2).join("/");
+	return rel.length > 44 ? "…" + rel.slice(-43) : rel;
+}
+
+function friendlyToolLine(name, args) {
+	const label = TOOL_LABELS[name] ?? name;
+	let detail = "";
+	try {
+		const a = args ?? {};
+		if (name === "read" || name === "write" || name === "edit") detail = shortenPath(a.path);
+		else if (name === "material_get" || name === "material_update" || name === "material_alternatives") detail = a.id ?? a.material_ref ?? "";
+		else if (name === "material_add") {
+			const items = Array.isArray(a.items) ? a.items : [];
+			const names = items.map((x) => x?.name ?? x?.cid).filter(Boolean);
+			detail = names.slice(0, 3).join("、") + (names.length > 3 ? ` 等 ${names.length} 项` : "");
+		}
+		else if (name === "formula_heatmap") detail = `${(a.paths ?? []).length || ""} 个配方`;
+		else if (name === "formula_diff") detail = "两版对比";
+		else if (typeof a.path === "string") detail = shortenPath(a.path);
+		else if (typeof a.id === "string") detail = a.id;
+	} catch {
+		/* 参数形状异常时只显示标签 */
+	}
+	return `⚙ ${label}${detail ? ` · ${detail}` : ""}`;
 }
 
 function addBubble(role, text) {
@@ -519,6 +567,8 @@ async function sendMessage() {
 	try {
 		await ensureSession();
 		addBubble("user", text);
+		chat.pendingEchoes.push(text);
+		if (chat.pendingEchoes.length > 20) chat.pendingEchoes.shift();
 		input.value = "";
 		let r = await fetch("/api/chat/message", {
 			method: "POST", headers: { "content-type": "application/json" },
