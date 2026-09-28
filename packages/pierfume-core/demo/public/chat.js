@@ -52,11 +52,27 @@ async function selectSession(id) {
 	chat.lastSeq = 0;
 	chat.seen = new Set();
 	chat$("#chat-messages").innerHTML = "";
-	await api("/api/chat/resume", { id });
-	const { events } = await (await fetch(`/api/chat/history?id=${id}`)).json();
-	for (const rec of events) replayEvent(rec);
+	try {
+		await api("/api/chat/resume", { id });
+	} catch {
+		/* 会话可能已在内存,继续 */
+	}
+	let events = [];
+	try {
+		const { events: evs } = await (await fetch(`/api/chat/history?id=${id}`)).json();
+		events = Array.isArray(evs) ? evs : [];
+	} catch {
+		/* 历史损坏不阻塞换会话 */
+	}
+	for (const rec of events) {
+		try {
+			replayEvent(rec);
+		} catch {
+			/* 单条坏事件跳过 */
+		}
+	}
 	openSSE();
-	setStatus("就绪");
+	setStatus(chat.busy ? "思考中…" : "就绪");
 	loadSessionList();
 }
 
@@ -67,6 +83,8 @@ function openSSE() {
 	let errors = 0;
 	es.onopen = () => {
 		errors = 0;
+		// 重连成功后必须刷新状态文本,否则"连接中断,重连中…"会永久残留(状态只在出错时写,成功时从不复位)
+		setStatus(chat.busy ? "思考中…" : "就绪");
 	};
 	es.onmessage = (msg) => {
 		errors = 0;
@@ -527,8 +545,12 @@ chat$("#chat-input").addEventListener("keydown", (e) => {
 	}
 });
 chat$("#btn-chat-new").addEventListener("click", async () => {
-	const { id } = await api("/api/chat/new");
-	await selectSession(id);
+	try {
+		const { id } = await api("/api/chat/new");
+		await selectSession(id);
+	} catch (e) {
+		setStatus(`新建会话失败: ${e instanceof Error ? e.message : e}`);
+	}
 });
 chat$("#btn-chat-stop").addEventListener("click", () => api("/api/chat/abort", { id: chat.sessionId }));
 chat$("#chat-sessions").addEventListener("change", async (e) => {
