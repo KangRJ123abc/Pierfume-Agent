@@ -42,12 +42,17 @@ async function loadSessionList() {
 
 async function ensureSession() {
 	if (chat.sessionId) return chat.sessionId;
-	const { id } = await api("/api/chat/new");
+	const { id } = await api("/api/chat/new", {});
+	if (!id) throw new Error("服务器未返回会话 id");
 	await selectSession(id);
 	return id;
 }
 
 async function selectSession(id) {
+	if (typeof id !== "string" || !id) {
+		setStatus("会话 id 无效(创建失败?)");
+		return;
+	}
 	chat.sessionId = id;
 	chat.lastSeq = 0;
 	chat.seen = new Set();
@@ -546,7 +551,8 @@ chat$("#chat-input").addEventListener("keydown", (e) => {
 });
 chat$("#btn-chat-new").addEventListener("click", async () => {
 	try {
-		const { id } = await api("/api/chat/new");
+		const { id } = await api("/api/chat/new", {});
+		if (!id) throw new Error("服务器未返回会话 id");
 		await selectSession(id);
 	} catch (e) {
 		setStatus(`新建会话失败: ${e instanceof Error ? e.message : e}`);

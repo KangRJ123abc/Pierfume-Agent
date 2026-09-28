@@ -291,6 +291,9 @@ const server = createServer(async (req, res) => {
 	const path = url.pathname;
 
 	try {
+		if (!path.startsWith("/static/") && path !== "/api/chat/events") {
+			console.log(`[req] ${req.method} ${path} (since=${url.searchParams.get("since") ?? "-"})`);
+		}
 		// ---- 静态前端 ----
 		if (req.method === "GET" && (path === "/" || path === "/index.html")) {
 			return send(res, 200, readFileSync(join(PUBLIC_DIR, "index.html"), "utf8"), MIME[".html"]);
@@ -609,7 +612,8 @@ const server = createServer(async (req, res) => {
 			}
 			return send(res, 200, { sessions: list.sort((a, b) => b.createdAt - a.createdAt) });
 		}
-		if (req.method === "POST" && path === "/api/chat/new") {
+		// 注意:前端 api() 对无 body 调用发 GET,故此处同时接受 GET/POST
+		if ((req.method === "POST" || req.method === "GET") && path === "/api/chat/new") {
 			const id = randomUUID().slice(0, 8);
 			spawnChat(id, { resume: false });
 			return send(res, 200, { id });
@@ -660,6 +664,7 @@ const server = createServer(async (req, res) => {
 		}
 		if (req.method === "POST" && path === "/api/chat/message") {
 			const { id, text } = JSON.parse(await readBody(req));
+			if (typeof id !== "string" || !/^[A-Za-z0-9-]+$/.test(id)) return send(res, 400, { error: "bad id" });
 			// 目录存在即自动恢复(如服务器重启后内存中无此会话)
 			const chat = chats.get(id) ?? (existsSync(join(CHATS_DIR, id)) ? spawnChat(id, { resume: true }) : null);
 			if (!chat || chat.dead) return send(res, 410, { error: "chat not live" });
@@ -688,6 +693,7 @@ const server = createServer(async (req, res) => {
 
 		send(res, 404, { error: "not found" });
 	} catch (e) {
+		console.error(`[err] ${req.method} ${req.url}:`, e);
 		send(res, 500, { error: e instanceof Error ? e.message : String(e) });
 	}
 });
