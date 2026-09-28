@@ -207,6 +207,7 @@ function matOpenForm(mode, preset = {}) {
 		const name = overlay.querySelector("#mat-f-name").value.trim();
 		const owned = overlay.querySelector('input[name="mat-cidmode"]:checked').value === "owned";
 		const cidNum = Number(cidInput.value);
+		const cid = owned ? MAT_USER_OWNED : cidNum;
 		const cas = overlay.querySelector("#mat-f-cas").value.trim();
 		const note = overlay.querySelector('input[name="mat-note"]:checked')?.value;
 		const odor = overlay.querySelector("#mat-f-odor").value.trim();
